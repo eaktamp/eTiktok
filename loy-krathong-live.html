@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ลอยกระทงอธิษฐาน - TikTok LIVE Interactive Game</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&display=swap');
+
+    :root {
+      --gold: #ffd86b;
+      --gold-deep: #f59e0b;
+      --amber: #ffb703;
+      --lotus-pink: #ff6b9d;
+      --lotus-soft: #ffc2d9;
+      --night-top: #050919;
+      --night-mid: #0b1636;
+      --night-horizon: #152852;
+      --river-top: #091d3e;
+      --river-bot: #040d21;
+      --card-bg: rgba(10, 20, 48, 0.78);
+      --card-border: rgba(255, 216, 107, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #02040c;
+      font-family: 'Prompt', 'Noto Sans Thai', 'Segoe UI', Tahoma, sans-serif;
+      color: #fff;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    /* 1080x1920 Virtual Stage scaled cleanly to any viewport */
+    #viewport-wrapper {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+      transform-origin: center center;
+      flex-shrink: 0;
+    }
+
+    #stage {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, var(--night-top) 0%, var(--night-mid) 28%, var(--night-horizon) 40%, var(--river-top) 41%, var(--river-bot) 100%);
+      box-shadow: 0 0 80px rgba(0, 0, 0, 0.9);
+    }
+
+    /* ==================== BACKGROUND SCENE ==================== */
+    .sky-layer {
+      position: absolute;
+      inset: 0 0 1120px 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .stars-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .star-twinkle {
+      animation: twinkle var(--dur, 3s) ease-in-out infinite alternate;
+      animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.25; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1.15); }
+    }
+
+    /* Full Moon */
+    .moon-wrap {
+      position: absolute;
+      top: 150px;
+      right: 72px;
+      width: 240px;
+      height: 240px;
+      pointer-events: none;
+      filter: drop-shadow(0 0 55px rgba(255, 226, 130, 0.75));
+      animation: moonFloat 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes moonFloat {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-10px); }
+    }
+
+    /* Sky Lanterns */
+    .lantern-layer {
+      position: absolute;
+      inset: 0 0 1100px 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .sky-lantern {
+      position: absolute;
+      bottom: -80px;
+      animation: lanternRise var(--rise-dur, 18s) linear infinite;
+      animation-delay: var(--rise-delay, 0s);
+      opacity: 0;
+    }
+
+    @keyframes lanternRise {
+      0% { transform: translateY(0) translateX(0) scale(0.85); opacity: 0; }
+      10% { opacity: 0.92; }
+      50% { transform: translateY(-420px) translateX(var(--sway, 28px)) scale(0.95); opacity: 0.85; }
+      90% { opacity: 0.5; }
+      100% { transform: translateY(-860px) translateX(calc(var(--sway, 28px) * -0.5)) scale(0.75); opacity: 0; }
+    }
+
+    /* Horizon Silhouette & Thai Temple */
+    .horizon-silhouette {
+      position: absolute;
+      top: 795px;
+      left: 0;
+      width: 1080px;
+      height: 175px;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* River & Moon Reflection */
+    .river-layer {
+      position: absolute;
+      top: 910px;
+      left: 0;
+      width: 1080px;
+      height: 1010px;
+      z-index: 3;
+      overflow: hidden;
+      background: linear-gradient(180deg, #0b2248 0%, #081836 35%, #050f24 75%, #030816 100%);
+    }
+
+    .moon-reflection {
+      position: absolute;
+      top: 10px;
+      right: 115px;
+      width: 155px;
+      height: 520px;
+      background: radial-gradient(ellipse at top, rgba(255, 224, 130, 0.38) 0%, rgba(255, 210, 100, 0.14) 45%, transparent 80%);
+      filter: blur(8px);
+      animation: shimmerReflect 4s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes shimmerReflect {
+      0% { transform: scaleX(0.92); opacity: 0.7; }
+      100% { transform: scaleX(1.08); opacity: 1; }
+    }
+
+    .water-waves {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .wave-line {
+      animation: waveDrift var(--w-dur, 7s) ease-in-out infinite alternate;
+    }
+
+    @keyframes waveDrift {
+      0% { transform: translateX(-24px); }
+      100% { transform: translateX(24px); }
+    }
+
+    /* ==================== HEADER & HUD (SAFE TOP ZONE) ==================== */
+    .hud-top {
+      position: absolute;
+      top: 110px;
+      left: 44px;
+      right: 44px;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .title-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255, 216, 107, 0.16);
+      border: 2px solid rgba(255, 216, 107, 0.55);
+      border-radius: 999px;
+      padding: 10px 28px;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 14px;
+      backdrop-filter: blur(6px);
+    }
+
+    .main-title {
+      font-size: 74px;
+      font-weight: 800;
+      line-height: 1.1;
+      background: linear-gradient(180deg, #fff7d6 0%, #ffd86b 55%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.75));
+      letter-spacing: 0.5px;
+    }
+
+    .sub-title {
+      font-size: 30px;
+      font-weight: 600;
+      color: #dbeafe;
+      margin-top: 8px;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.85);
+    }
+
+    /* Progress & Rules Card */
+    .progress-card {
+      position: absolute;
+      top: 320px;
+      left: 44px;
+      right: 44px;
+      background: var(--card-bg);
+      border: 2.5px solid var(--card-border);
+      border-radius: 32px;
+      padding: 22px 28px;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .progress-title {
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .like-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 107, 157, 0.22);
+      border: 2px solid rgba(255, 107, 157, 0.65);
+      border-radius: 999px;
+      padding: 8px 24px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffd1e0;
+    }
+
+    .checkpoints-track {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 10px 6px;
+    }
+
+    .track-line-bg {
+      position: absolute;
+      left: 36px;
+      right: 36px;
+      top: 44px;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .track-line-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff6b9d, #ffd86b);
+      border-radius: 999px;
+      transition: width 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: 0 0 18px rgba(255, 216, 107, 0.8);
+    }
+
+    .cp-node {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 110px;
+    }
+
+    .cp-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #102046;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      font-weight: 800;
+      color: #94a3b8;
+      transition: all 0.4s ease;
+    }
+
+    .cp-node.active .cp-circle {
+      background: linear-gradient(135deg, #ffd86b, #f59e0b);
+      border-color: #fff7d6;
+      color: #3b1c00;
+      box-shadow: 0 0 26px rgba(255, 216, 107, 0.85);
+      transform: scale(1.1);
+    }
+
+    .cp-node.goal .cp-circle {
+      border-color: rgba(255, 216, 107, 0.7);
+    }
+
+    .cp-label {
+      font-size: 26px;
+      font-weight: 600;
+      color: #cbd5e1;
+      text-align: center;
+    }
+
+    .cp-node.active .cp-label {
+      color: var(--gold);
+    }
+
+    .rules-strip {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.14);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 26px;
+      color: #e2e8f0;
+      line-height: 1.35;
+    }
+
+    .rule-tag {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 6px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .rule-tag b {
+      color: var(--gold);
+    }
+
+    /* Wish Board */
+    .wish-board {
+      position: absolute;
+      top: 715px;
+      left: 44px;
+      right: 44px;
+      background: rgba(15, 27, 62, 0.84);
+      border: 2px solid rgba(255, 183, 3, 0.55);
+      border-radius: 26px;
+      padding: 18px 28px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .wish-icon {
+      width: 66px;
+      height: 66px;
+      flex-shrink: 0;
+      border-radius: 18px;
+      background: rgba(255, 216, 107, 0.15);
+      border: 2px solid rgba(255, 216, 107, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wish-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .wish-meta {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .wish-text {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ==================== GREETING TOAST (JOIN / SHARE) ==================== */
+    #greeting-container {
+      position: absolute;
+      top: 855px;
+      left: 44px;
+      right: 44px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      pointer-events: none;
+    }
+
+    .greet-toast {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: linear-gradient(90deg, rgba(20, 38, 86, 0.94), rgba(45, 25, 78, 0.92));
+      border: 2.5px solid var(--gold);
+      border-radius: 999px;
+      padding: 14px 30px 14px 16px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65), 0 0 24px rgba(255, 216, 107, 0.35);
+      animation: toastSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .greet-toast.leaving {
+      animation: toastFadeOut 0.4s ease forwards;
+    }
+
+    @keyframes toastSlideIn {
+      0% { opacity: 0; transform: translateY(-24px) scale(0.94); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes toastFadeOut {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-18px) scale(0.96); }
+    }
+
+    .greet-avatar {
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      border: 3px solid var(--gold);
+      object-fit: cover;
+      background: #1e293b;
+      flex-shrink: 0;
+    }
+
+    .greet-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .greet-name {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--gold);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .greet-msg {
+      font-size: 27px;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    /* ==================== RIVER STAGE & KRATHONGS ==================== */
+    .river-stage {
+      position: absolute;
+      top: 930px;
+      left: 0;
+      width: 1080px;
+      height: 540px;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    /* Milestone Lotus Buoys on the River */
+    .river-buoy {
+      position: absolute;
+      top: 320px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0.55;
+      transition: all 0.4s ease;
+    }
+
+    .river-buoy.reached {
+      opacity: 1;
+      filter: drop-shadow(0 0 18px rgba(255, 216, 107, 0.85));
+    }
+
+    .buoy-label {
+      margin-top: 6px;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fde68a;
+      background: rgba(5, 12, 32, 0.72);
+      padding: 2px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 216, 107, 0.4);
+    }
+
+    /* Main Krathong */
+    #main-krathong-wrap {
+      position: absolute;
+      top: 155px;
+      left: 175px;
+      transform: translateX(-50%);
+      transition: left 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 18;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .krathong-bob {
+      animation: bobbing 3.2s ease-in-out infinite alternate;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @keyframes bobbing {
+      0% { transform: translateY(0px) rotate(-1.5deg); }
+      100% { transform: translateY(-14px) rotate(1.5deg); }
+    }
+
+    .krathong-wish-tag {
+      background: linear-gradient(135deg, #fffbeb, #fde68a);
+      color: #451a03;
+      border: 3px solid #f59e0b;
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-size: 26px;
+      font-weight: 700;
+      max-width: 310px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+    }
+
+    .krathong-ripple {
+      width: 240px;
+      height: 36px;
+      border-radius: 50%;
+      border: 3px solid rgba(147, 197, 253, 0.45);
+      margin-top: -16px;
+      animation: ripplePulse 2.4s ease-out infinite;
+    }
+
+    @keyframes ripplePulse {
+      0% { transform: scale(0.85); opacity: 0.8; }
+      100% { transform: scale(1.35); opacity: 0; }
+    }
+
+    .candle-flame {
+      transform-origin: center bottom;
+      animation: flicker 0.35s ease-in-out infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { transform: scaleY(0.92) scaleX(0.95) rotate(-2deg); opacity: 0.9; }
+      100% { transform: scaleY(1.08) scaleX(1.04) rotate(2deg); opacity: 1; }
+    }
+
+    /* People on Pier & Boat */
+    .pier-scene-left {
+      position: absolute;
+      top: 360px;
+      left: 0;
+      width: 340px;
+      height: 220px;
+      z-index: 19;
+      pointer-events: none;
+    }
+
+    .boat-scene-right {
+      position: absolute;
+      top: 375px;
+      right: 12px;
+      width: 280px;
+      height: 190px;
+      z-index: 19;
+      pointer-events: none;
+      animation: boatBob 4.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes boatBob {
+      0% { transform: translateY(0px) rotate(-1.2deg); }
+      100% { transform: translateY(-9px) rotate(1.2deg); }
+    }
+
+    .person-sway {
+      transform-origin: bottom center;
+      animation: personSway 3.6s ease-in-out infinite alternate;
+    }
+
+    @keyframes personSway {
+      0% { transform: rotate(-1.5deg); }
+      100% { transform: rotate(1.5deg); }
+    }
+
+    .arm-wave {
+      transform-origin: 125px 78px;
+      animation: armWave 2.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes armWave {
+      0% { transform: rotate(-6deg); }
+      100% { transform: rotate(10deg); }
+    }
+
+    /* Personal Krathongs Layer */
+    #personal-krathongs {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .personal-krathong {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: floatAcross var(--float-dur, 14s) linear forwards;
+    }
+
+    @keyframes floatAcross {
+      0% { transform: translateX(-180px) translateY(0px); opacity: 0; }
+      8% { opacity: 1; }
+      50% { transform: translateX(540px) translateY(-12px); opacity: 1; }
+      92% { opacity: 1; }
+      100% { transform: translateX(1240px) translateY(6px); opacity: 0; }
+    }
+
+    .pk-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid rgba(255, 216, 107, 0.7);
+      border-radius: 999px;
+      padding: 4px 16px 4px 6px;
+      margin-bottom: 4px;
+    }
+
+    .pk-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--gold);
+    }
+
+    .pk-name {
+      font-size: 26px;
+      font-weight: 700;
+      color: #fef08a;
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Floating Action Feedback (+1, +2, Gift!) */
+    #float-fx-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 35;
+    }
+
+    .float-pop {
+      position: absolute;
+      font-size: 44px;
+      font-weight: 800;
+      color: var(--gold);
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.85);
+      animation: popUp 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes popUp {
+      0% { opacity: 0; transform: translateY(20px) scale(0.7); }
+      20% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+      100% { opacity: 0; transform: translateY(-110px) scale(1); }
+    }
+
+    /* ==================== FIREWORKS & BLESSING CARD OVERLAY ==================== */
+    #fireworks-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      overflow: hidden;
+    }
+
+    .fw-burst {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+    }
+
+    .fw-spark {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--spark-color, #ffd86b);
+      box-shadow: 0 0 18px var(--spark-color, #ffd86b);
+      animation: sparkFly 1.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes sparkFly {
+      0% { transform: translate(0, 0) scale(1.3); opacity: 1; }
+      75% { opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
+    }
+
+    #blessing-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 45;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 54px 360px;
+      background: radial-gradient(circle at center, rgba(15, 23, 60, 0.72), rgba(4, 8, 22, 0.82));
+      backdrop-filter: blur(6px);
+    }
+
+    #blessing-overlay.show {
+      display: flex;
+      animation: fadeInOverlay 0.45s ease forwards;
+    }
+
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .blessing-card {
+      width: 100%;
+      background: linear-gradient(165deg, rgba(28, 20, 68, 0.96) 0%, rgba(12, 24, 58, 0.98) 100%);
+      border: 4px solid var(--gold);
+      border-radius: 44px;
+      padding: 48px 44px;
+      text-align: center;
+      box-shadow: 0 0 80px rgba(255, 216, 107, 0.45), 0 30px 70px rgba(0, 0, 0, 0.8);
+      animation: cardPop 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes cardPop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .blessing-heading {
+      font-size: 68px;
+      font-weight: 800;
+      background: linear-gradient(180deg, #fffbeb 0%, #ffd86b 60%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 18px;
+    }
+
+    .blessing-body {
+      font-size: 38px;
+      font-weight: 700;
+      color: #fef3c7;
+      line-height: 1.45;
+      margin-bottom: 28px;
+    }
+
+    .blessing-wish-box {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 216, 107, 0.45);
+      border-radius: 26px;
+      padding: 22px 28px;
+      margin-bottom: 24px;
+    }
+
+    .blessing-wish-label {
+      font-size: 26px;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .blessing-wish-val {
+      font-size: 34px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .blessing-supporter {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255, 216, 107, 0.16);
+      border: 2px solid var(--gold);
+      border-radius: 999px;
+      padding: 10px 28px 10px 12px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fde68a;
+    }
+
+    .blessing-supporter img {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      object-fit: cover;
+    }
+
+    /* ==================== TEST / SIMULATOR PANEL ==================== */
+    /* Kept at bottom for browser testing; hidden immediately with ?clean=1 */
+    #sim-panel {
+      position: absolute;
+      bottom: 28px;
+      left: 36px;
+      right: 36px;
+      z-index: 60;
+      background: rgba(9, 15, 34, 0.92);
+      border: 2px solid rgba(148, 163, 184, 0.35);
+      border-radius: 28px;
+      padding: 20px 24px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    body.clean-mode #sim-panel,
+    body.clean-mode #ws-status-pill {
+      display: none !important;
+    }
+
+    .sim-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sim-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #93c5fd;
+    }
+
+    #ws-status-pill {
+      position: absolute;
+      top: 42px;
+      right: 44px;
+      z-index: 60;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      padding: 8px 20px;
+      font-size: 26px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    #music-toggle-btn {
+      position: absolute;
+      top: 42px;
+      left: 44px;
+      z-index: 60;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 2px solid rgba(255, 216, 107, 0.55);
+      border-radius: 999px;
+      padding: 8px 22px;
+      font-family: inherit;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fde68a;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    #music-toggle-btn:hover {
+      background: rgba(30, 41, 59, 0.95);
+    }
+
+    #music-toggle-btn:active {
+      transform: scale(0.96);
+    }
+
+    .ws-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #f59e0b;
+    }
+
+    .ws-dot.connected {
+      background: #22c55e;
+      box-shadow: 0 0 12px #22c55e;
+    }
+
+    .ws-dot.disconnected {
+      background: #ef4444;
+    }
+
+    .sim-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .sim-btn {
+      font-family: inherit;
+      font-size: 26px;
+      font-weight: 700;
+      padding: 16px 14px;
+      border-radius: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      background: rgba(30, 41, 59, 0.9);
+      color: #f8fafc;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.2s ease;
+    }
+
+    .sim-btn:active {
+      transform: scale(0.96);
+    }
+
+    .sim-btn.like { background: linear-gradient(135deg, #be185d, #ec4899); border-color: #f9a8d4; }
+    .sim-btn.wish { background: linear-gradient(135deg, #0369a1, #0ea5e9); border-color: #7dd3fc; }
+    .sim-btn.spawn { background: linear-gradient(135deg, #047857, #10b981); border-color: #6ee7b7; }
+    .sim-btn.gift1 { background: linear-gradient(135deg, #b45309, #f59e0b); border-color: #fde68a; }
+    .sim-btn.gift5 { background: linear-gradient(135deg, #7e22ce, #c026d3); border-color: #f0abfc; }
+    .sim-btn.greet { background: linear-gradient(135deg, #334155, #475569); border-color: #cbd5e1; }
+
+    .sim-input-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .sim-input {
+      flex: 1;
+      font-family: inherit;
+      font-size: 26px;
+      padding: 14px 20px;
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      background: rgba(15, 23, 42, 0.95);
+      color: #ffffff;
+      outline: none;
+    }
+
+    .sim-input:focus {
+      border-color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <div id="viewport-wrapper">
+    <div id="stage">
+      <!-- Thai Music Toggle Button -->
+      <button id="music-toggle-btn" onclick="toggleThaiMusic()">🔇 ดนตรีไทย: ปิด</button>
+
+      <!-- WebSocket Status (Hidden in ?clean=1) -->
+      <div id="ws-status-pill">
+        <span class="ws-dot" id="ws-dot"></span>
+        <span id="ws-status-text">กำลังเชื่อมต่อ WS...</span>
+      </div>
+
+      <!-- Sky & Stars -->
+      <div class="sky-layer">
+        <svg class="stars-svg" id="stars-svg" viewBox="0 0 1080 800" preserveAspectRatio="none"></svg>
+      </div>
+
+      <!-- Sky Lanterns -->
+      <div class="lantern-layer" id="lantern-layer"></div>
+
+      <!-- Full Moon -->
+      <div class="moon-wrap">
+        <svg viewBox="0 0 240 240" width="240" height="240">
+          <defs>
+            <radialGradient id="moonGrad" cx="38%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#fffef0" />
+              <stop offset="55%" stop-color="#fde68a" />
+              <stop offset="100%" stop-color="#f59e0b" />
+            </radialGradient>
+          </defs>
+          <circle cx="120" cy="120" r="102" fill="url(#moonGrad)" />
+          <circle cx="85" cy="95" r="18" fill="rgba(217, 119, 6, 0.14)" />
+          <circle cx="145" cy="135" r="26" fill="rgba(217, 119, 6, 0.12)" />
+          <circle cx="130" cy="72" r="11" fill="rgba(217, 119, 6, 0.15)" />
+        </svg>
+      </div>
+
+      <!-- Far Riverbank: Illuminated Thai Temple (อุโบสถช่อฟ้า + พระเจดีย์ทอง + ศาลา + ต้นมะพร้าว) -->
+      <svg class="horizon-silhouette" viewBox="0 0 1080 175" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="templeGold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fef08a" />
+            <stop offset="50%" stop-color="#f59e0b" />
+            <stop offset="100%" stop-color="#92400e" />
+          </linearGradient>
+          <linearGradient id="templeRoof" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#991b1b" />
+            <stop offset="100%" stop-color="#450a0a" />
+          </linearGradient>
+        </defs>
+
+        <!-- Distant Trees & Riverbank -->
+        <path d="M0,175 L0,126 Q75,104 150,122 Q240,136 330,118 Q440,104 540,124 Q660,134 770,115 Q900,100 1080,122 L1080,175 Z" fill="#07112b" />
+
+        <!-- Coconut Palms Left -->
+        <path d="M72,135 Q62,92 48,66" stroke="#091534" stroke-width="5" fill="none" />
+        <path d="M48,66 Q24,58 14,74 M48,66 Q30,44 18,52 M48,66 Q66,46 80,58 M48,66 Q72,62 82,78" stroke="#091534" stroke-width="3.5" fill="none" stroke-linecap="round" />
+
+        <!-- Golden Thai Chedi / Pagoda (พระเจดีย์ทอง) -->
+        <g transform="translate(170, 8)">
+          <!-- Spire (ยอดฉัตร) -->
+          <line x1="48" y1="0" x2="48" y2="26" stroke="#fef08a" stroke-width="3" />
+          <circle cx="48" cy="4" r="3.5" fill="#fffbeb" />
+          <!-- Bell Body -->
+          <path d="M48,24 L56,56 Q68,78 74,98 L22,98 Q28,78 40,56 Z" fill="url(#templeGold)" stroke="#fde68a" stroke-width="1.2" />
+          <!-- Tiered Base -->
+          <rect x="16" y="98" width="64" height="10" rx="2" fill="#d97706" />
+          <rect x="10" y="108" width="76" height="12" rx="2" fill="#b45309" />
+          <rect x="4" y="120" width="88" height="14" rx="2" fill="#78350f" />
+        </g>
+
+        <!-- Thai Ubosot / Temple Hall (อุโบสถหลังคาซ้อนชั้น มีช่อฟ้า) -->
+        <g transform="translate(290, 26)">
+          <!-- Main Wall -->
+          <rect x="28" y="68" width="164" height="52" fill="#fef3c7" stroke="#d97706" stroke-width="2" />
+          <!-- Pillars -->
+          <rect x="38" y="68" width="8" height="52" fill="#f59e0b" />
+          <rect x="74" y="68" width="8" height="52" fill="#f59e0b" />
+          <rect x="138" y="68" width="8" height="52" fill="#f59e0b" />
+          <rect x="174" y="68" width="8" height="52" fill="#f59e0b" />
+          <!-- Glowing Temple Door -->
+          <path d="M98,120 L98,84 Q110,74 122,84 L122,120 Z" fill="#fbbf24" />
+          <!-- Lower Roof Tier -->
+          <path d="M10,72 L110,32 L210,72 L196,76 L110,42 L24,76 Z" fill="url(#templeRoof)" stroke="#fbbf24" stroke-width="2" />
+          <!-- Upper Roof Tier -->
+          <path d="M36,48 L110,12 L184,48 L170,52 L110,22 L50,52 Z" fill="url(#templeRoof)" stroke="#fbbf24" stroke-width="2" />
+          <!-- Chofah (ช่อฟ้า) -->
+          <path d="M110,12 Q114,-4 122,-2 Q114,4 114,14 Z" fill="#fef08a" />
+          <path d="M10,72 Q2,60 8,56 Q10,64 16,70 Z" fill="#fef08a" />
+          <path d="M210,72 Q218,60 212,56 Q210,64 204,70 Z" fill="#fef08a" />
+          <!-- Base -->
+          <rect x="18" y="120" width="184" height="14" fill="#92400e" />
+        </g>
+
+        <!-- Riverside Sala (ศาลาท่าน้ำ) Right -->
+        <g transform="translate(835, 58)">
+          <rect x="18" y="44" width="114" height="44" fill="rgba(254, 243, 199, 0.14)" />
+          <rect x="20" y="44" width="7" height="44" fill="#b45309" />
+          <rect x="123" y="44" width="7" height="44" fill="#b45309" />
+          <path d="M4,46 L75,14 L146,46 Z" fill="url(#templeRoof)" stroke="#fbbf24" stroke-width="2" />
+          <path d="M75,14 Q78,2 84,4 Q78,8 78,16 Z" fill="#fef08a" />
+          <circle cx="75" cy="54" r="7" fill="#fde047" opacity="0.9" />
+        </g>
+
+        <!-- Temple Fair String Lights (ไฟราวงานวัดริมฝั่ง) -->
+        <path d="M160,138 Q300,152 440,138 Q620,152 820,138 Q920,148 1020,136" stroke="rgba(253, 224, 71, 0.45)" stroke-width="1.5" fill="none" />
+        <circle cx="200" cy="142" r="4" fill="#fde047" />
+        <circle cx="260" cy="145" r="4" fill="#f472b6" />
+        <circle cx="320" cy="146" r="4" fill="#fde047" />
+        <circle cx="380" cy="143" r="4" fill="#38bdf8" />
+        <circle cx="520" cy="143" r="4" fill="#fde047" />
+        <circle cx="620" cy="146" r="4" fill="#f472b6" />
+        <circle cx="720" cy="144" r="4" fill="#fde047" />
+        <circle cx="880" cy="142" r="4" fill="#fde047" />
+        <circle cx="940" cy="143" r="4" fill="#fb923c" />
+      </svg>
+
+      <!-- River & Waves -->
+      <div class="river-layer">
+        <div class="moon-reflection"></div>
+        <svg class="water-waves" viewBox="0 0 1080 1140" preserveAspectRatio="none">
+          <g stroke="#60a5fa" stroke-width="3" fill="none" stroke-linecap="round">
+            <path class="wave-line" style="--w-dur:6s" d="M60,80 Q180,68 300,80 T540,80 T780,80 T1020,80" opacity="0.35" />
+            <path class="wave-line" style="--w-dur:8s" d="M-40,180 Q110,194 260,180 T560,180 T860,180 T1120,180" opacity="0.3" />
+            <path class="wave-line" style="--w-dur:7s" d="M40,310 Q190,295 340,310 T640,310 T940,310" opacity="0.28" />
+            <path class="wave-line" style="--w-dur:9s" d="M-20,450 Q150,468 320,450 T660,450 T1000,450" opacity="0.25" />
+            <path class="wave-line" style="--w-dur:7.5s" d="M80,610 Q240,595 400,610 T720,610 T1040,610" opacity="0.2" />
+          </g>
+        </svg>
+      </div>
+
+      <!-- HUD Top -->
+      <div class="hud-top">
+        <div class="title-badge">🌕 คืนวันเพ็ญเดือนสิบสอง • TikTok LIVE</div>
+        <h1 class="main-title">ลอยกระทงอธิษฐาน</h1>
+        <p class="sub-title">ร่วมส่งแรงใจพากระทงลอยสู่ฝั่งสมหวัง</p>
+      </div>
+
+      <!-- Progress & Rules Card -->
+      <div class="progress-card">
+        <div class="progress-header">
+          <div class="progress-title" id="progress-label">จุดหมาย: จุดที่ 0 / 5</div>
+          <div class="like-pill">❤️ แรงใจ <span id="like-progress">0/2</span></div>
+        </div>
+
+        <div class="checkpoints-track">
+          <div class="track-line-bg">
+            <div class="track-line-fill" id="track-line-fill"></div>
+          </div>
+          <div class="cp-node" data-step="1">
+            <div class="cp-circle">1</div>
+            <div class="cp-label">จุดที่ 1</div>
+          </div>
+          <div class="cp-node" data-step="2">
+            <div class="cp-circle">2</div>
+            <div class="cp-label">จุดที่ 2</div>
+          </div>
+          <div class="cp-node" data-step="3">
+            <div class="cp-circle">3</div>
+            <div class="cp-label">จุดที่ 3</div>
+          </div>
+          <div class="cp-node" data-step="4">
+            <div class="cp-circle">4</div>
+            <div class="cp-label">จุดที่ 4</div>
+          </div>
+          <div class="cp-node goal" data-step="5">
+            <div class="cp-circle">✨</div>
+            <div class="cp-label">สมหวัง</div>
+          </div>
+        </div>
+
+        <div class="rules-strip">
+          <div class="rule-tag">❤️ กดใจ <b>2 ครั้ง</b> = เดิน 1 จุด</div>
+          <div class="rule-tag">🎁 <b>1 เหรียญ</b> = +2 จุด</div>
+          <div class="rule-tag">🎆 <b>5+ เหรียญ</b> = พุ่งเข้าเส้นชัย!</div>
+          <div class="rule-tag">💬 พิมพ์ <b>"ขอพร..."</b> / <b>"ลอยกระทง"</b></div>
+        </div>
+      </div>
+
+      <!-- Latest Wish Board -->
+      <div class="wish-board">
+        <div class="wish-icon">
+          <svg viewBox="0 0 64 64" width="44" height="44">
+            <path d="M12,38 Q32,56 52,38 L46,48 Q32,58 18,48 Z" fill="#16a34a" />
+            <path d="M18,38 Q22,22 32,20 Q42,22 46,38 Z" fill="#f472b6" />
+            <path d="M24,38 Q27,26 32,24 Q37,26 40,38 Z" fill="#fbcfe8" />
+            <rect x="30" y="14" width="4" height="12" fill="#fef08a" />
+            <path d="M32,4 Q36,10 32,14 Q28,10 32,4 Z" fill="#fb923c" />
+          </svg>
+        </div>
+        <div class="wish-content">
+          <div class="wish-meta" id="wish-author">บอร์ดคำอธิษฐานล่าสุด • พิมพ์ "ขอพร..." ในแชต</div>
+          <div class="wish-text" id="wish-text">"ขอให้ทุกคนพบเจอแต่ความสุข ความเจริญรุ่งเรือง"</div>
+        </div>
+      </div>
+
+      <!-- Join / Share Greeting Container -->
+      <div id="greeting-container"></div>
+
+      <!-- River Stage (Checkpoints + Main Krathong + Personal Krathongs) -->
+      <div class="river-stage">
+        <div id="personal-krathongs"></div>
+
+        <!-- Left Wooden Pier & Thai Couple Releasing Krathongs -->
+        <div class="pier-scene-left">
+          <svg viewBox="0 0 340 220" width="340" height="220" style="filter: drop-shadow(0 10px 18px rgba(0,0,0,0.65));">
+            <!-- Pier Pilings -->
+            <rect x="28" y="148" width="16" height="68" rx="3" fill="#451a03" />
+            <rect x="135" y="152" width="16" height="64" rx="3" fill="#451a03" />
+            <rect x="245" y="156" width="16" height="60" rx="3" fill="#451a03" />
+            <!-- Wooden Pier Deck -->
+            <path d="M0,136 L278,148 L294,164 L0,164 Z" fill="#78350f" stroke="#451a03" stroke-width="2.5" />
+            <line x1="0" y1="146" x2="282" y2="156" stroke="#92400e" stroke-width="2" />
+
+            <!-- Pier Lantern Post -->
+            <rect x="20" y="34" width="10" height="106" rx="3" fill="#5c2808" />
+            <line x1="25" y1="40" x2="58" y2="40" stroke="#5c2808" stroke-width="5" stroke-linecap="round" />
+            <line x1="54" y1="40" x2="54" y2="54" stroke="#fbbf24" stroke-width="2" />
+            <ellipse cx="54" cy="68" rx="14" ry="18" fill="#fb923c" stroke="#fef08a" stroke-width="2" />
+            <circle cx="54" cy="68" r="7" fill="#fef9c3" />
+
+            <!-- Person 1: Man in Thai shirt waving & holding krathong -->
+            <g class="person-sway">
+              <!-- Legs / Chong Kraben -->
+              <path d="M96,112 L90,145 L105,145 L109,118 L113,145 L128,145 L122,112 Z" fill="#1e3a8a" />
+              <!-- Torso (Rajapataen cream jacket + sash) -->
+              <path d="M92,70 Q109,64 126,70 L124,114 L94,114 Z" fill="#fef3c7" stroke="#d97706" stroke-width="1.5" />
+              <path d="M96,70 L122,112" stroke="#f59e0b" stroke-width="6" stroke-linecap="round" />
+              <!-- Waving Arm -->
+              <g class="arm-wave">
+                <path d="M124,74 L144,54" stroke="#fef3c7" stroke-width="9" stroke-linecap="round" />
+                <circle cx="146" cy="52" r="5.5" fill="#f1c27d" />
+              </g>
+              <!-- Left Arm -->
+              <path d="M94,75 L82,96" stroke="#fef3c7" stroke-width="9" stroke-linecap="round" />
+              <circle cx="81" cy="98" r="5" fill="#f1c27d" />
+              <!-- Head & Hair -->
+              <circle cx="109" cy="52" r="15" fill="#f1c27d" />
+              <path d="M94,50 Q109,32 124,50 Q120,40 109,40 Q98,40 94,50 Z" fill="#1e1b18" />
+              <!-- Smile & Eyes -->
+              <circle cx="104" cy="51" r="1.8" fill="#1e1b18" />
+              <circle cx="114" cy="51" r="1.8" fill="#1e1b18" />
+              <path d="M105,57 Q109,61 113,57" stroke="#991b1b" stroke-width="1.8" fill="none" stroke-linecap="round" />
+            </g>
+
+            <!-- Person 2: Woman in Pink Sabai kneeling to float Krathong -->
+            <g class="person-sway" style="animation-delay: -1.4s;">
+              <!-- Traditional Thai Skirt (Phasin) -->
+              <path d="M172,112 L162,146 L206,146 L198,112 Z" fill="#831843" stroke="#fbbf24" stroke-width="1.5" />
+              <!-- Torso & Pink Sabai -->
+              <path d="M172,76 Q186,70 198,76 L198,114 L172,114 Z" fill="#f472b6" />
+              <path d="M174,75 L197,112" stroke="#fbcfe8" stroke-width="7" stroke-linecap="round" />
+              <!-- Arms reaching toward water krathong -->
+              <path d="M196,82 L222,108" stroke="#f1c27d" stroke-width="7" stroke-linecap="round" />
+              <path d="M176,84 L208,112" stroke="#f1c27d" stroke-width="7" stroke-linecap="round" />
+              <!-- Head, Hair bun & Flower -->
+              <circle cx="185" cy="58" r="14" fill="#f1c27d" />
+              <circle cx="174" cy="50" r="7" fill="#1e1b18" />
+              <path d="M171,56 Q185,38 199,56 Q192,45 185,45 Q176,45 171,56 Z" fill="#1e1b18" />
+              <circle cx="179" cy="48" r="3.5" fill="#fde047" />
+              <!-- Face -->
+              <circle cx="183" cy="57" r="1.7" fill="#1e1b18" />
+              <circle cx="191" cy="57" r="1.7" fill="#1e1b18" />
+              <path d="M184,63 Q188,66 191,63" stroke="#991b1b" stroke-width="1.6" fill="none" stroke-linecap="round" />
+            </g>
+
+            <!-- Small Krathong being placed on water edge -->
+            <g transform="translate(226, 114)">
+              <ellipse cx="16" cy="20" rx="15" ry="5" fill="#15803d" />
+              <path d="M5,18 Q10,7 16,6 Q22,7 27,18 Z" fill="#f472b6" />
+              <rect x="14.5" y="4" width="3" height="9" fill="#fef08a" />
+              <path class="candle-flame" d="M16,-3 Q18.5,1 16,4 Q13.5,1 16,-3 Z" fill="#fb923c" />
+            </g>
+          </svg>
+        </div>
+
+        <!-- Right Traditional Boat & Viewer Holding Lantern -->
+        <div class="boat-scene-right">
+          <svg viewBox="0 0 280 190" width="280" height="190" style="filter: drop-shadow(0 12px 20px rgba(0,0,0,0.65));">
+            <!-- Person sitting in boat -->
+            <g class="person-sway" style="animation-delay: -0.8s;">
+              <!-- Torso -->
+              <path d="M118,74 Q134,68 150,74 L152,116 L116,116 Z" fill="#0ea5e9" stroke="#bae6fd" stroke-width="1.5" />
+              <!-- Scarf -->
+              <path d="M122,74 L146,108" stroke="#fde047" stroke-width="5" stroke-linecap="round" />
+              <!-- Arm holding glowing lantern -->
+              <path d="M120,82 L94,76" stroke="#f1c27d" stroke-width="7.5" stroke-linecap="round" />
+              <line x1="94" y1="76" x2="84" y2="96" stroke="#fbbf24" stroke-width="2" />
+              <ellipse cx="84" cy="108" rx="11" ry="14" fill="#fb923c" stroke="#fef08a" stroke-width="2" />
+              <circle cx="84" cy="108" r="5" fill="#fffbeb" />
+              <!-- Head & Hair -->
+              <circle cx="134" cy="56" r="14" fill="#f1c27d" />
+              <path d="M120,54 Q134,36 148,54 Q142,44 134,44 Q126,44 120,54 Z" fill="#1e1b18" />
+              <circle cx="129" cy="55" r="1.7" fill="#1e1b18" />
+              <circle cx="138" cy="55" r="1.7" fill="#1e1b18" />
+              <path d="M130,61 Q134,64 137,61" stroke="#991b1b" stroke-width="1.6" fill="none" stroke-linecap="round" />
+            </g>
+
+            <!-- Thai Wooden Boat (เรือพาย) -->
+            <path d="M24,118 Q140,146 258,108 L236,144 Q140,164 48,144 Z" fill="#78350f" stroke="#451a03" stroke-width="3" />
+            <path d="M32,120 Q140,144 248,112" stroke="#f59e0b" stroke-width="3" fill="none" />
+            <!-- Paddle -->
+            <line x1="168" y1="92" x2="210" y2="152" stroke="#b45309" stroke-width="4.5" stroke-linecap="round" />
+            <ellipse cx="212" cy="155" rx="7" ry="12" transform="rotate(-32 212 155)" fill="#92400e" />
+            <!-- Water Ripples around boat -->
+            <ellipse cx="140" cy="154" rx="108" ry="10" fill="none" stroke="rgba(147, 197, 253, 0.35)" stroke-width="2.5" />
+          </svg>
+        </div>
+
+        <!-- 5 River Milestone Buoys -->
+        <div class="river-buoy" id="buoy-1" style="left: 330px;">
+          <svg viewBox="0 0 60 46" width="56" height="44">
+            <ellipse cx="30" cy="34" rx="24" ry="8" fill="#15803d" />
+            <path d="M16,32 Q22,12 30,10 Q38,12 44,32 Z" fill="#f472b6" />
+            <circle cx="30" cy="14" r="5" fill="#fde047" />
+          </svg>
+          <span class="buoy-label">1</span>
+        </div>
+        <div class="river-buoy" id="buoy-2" style="left: 485px;">
+          <svg viewBox="0 0 60 46" width="56" height="44">
+            <ellipse cx="30" cy="34" rx="24" ry="8" fill="#15803d" />
+            <path d="M16,32 Q22,12 30,10 Q38,12 44,32 Z" fill="#f472b6" />
+            <circle cx="30" cy="14" r="5" fill="#fde047" />
+          </svg>
+          <span class="buoy-label">2</span>
+        </div>
+        <div class="river-buoy" id="buoy-3" style="left: 640px;">
+          <svg viewBox="0 0 60 46" width="56" height="44">
+            <ellipse cx="30" cy="34" rx="24" ry="8" fill="#15803d" />
+            <path d="M16,32 Q22,12 30,10 Q38,12 44,32 Z" fill="#f472b6" />
+            <circle cx="30" cy="14" r="5" fill="#fde047" />
+          </svg>
+          <span class="buoy-label">3</span>
+        </div>
+        <div class="river-buoy" id="buoy-4" style="left: 795px;">
+          <svg viewBox="0 0 60 46" width="56" height="44">
+            <ellipse cx="30" cy="34" rx="24" ry="8" fill="#15803d" />
+            <path d="M16,32 Q22,12 30,10 Q38,12 44,32 Z" fill="#f472b6" />
+            <circle cx="30" cy="14" r="5" fill="#fde047" />
+          </svg>
+          <span class="buoy-label">4</span>
+        </div>
+        <div class="river-buoy" id="buoy-5" style="left: 945px;">
+          <svg viewBox="0 0 74 58" width="72" height="56">
+            <ellipse cx="37" cy="44" rx="30" ry="10" fill="#ca8a04" />
+            <path d="M18,42 Q26,14 37,10 Q48,14 56,42 Z" fill="#ffd86b" />
+            <circle cx="37" cy="14" r="7" fill="#fffbeb" />
+          </svg>
+          <span class="buoy-label">เส้นชัย</span>
+        </div>
+
+        <!-- Main Player Krathong -->
+        <div id="main-krathong-wrap">
+          <div class="krathong-bob">
+            <div class="krathong-wish-tag" id="krathong-wish-tag">🙏 ขอให้สมหวังดังปรารถนา</div>
+            <svg viewBox="0 0 280 210" width="270" height="202" style="filter: drop-shadow(0 16px 26px rgba(0,0,0,0.65));">
+              <defs>
+                <radialGradient id="candleGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="rgba(255, 230, 120, 0.9)" />
+                  <stop offset="100%" stop-color="rgba(255, 180, 30, 0)" />
+                </radialGradient>
+                <linearGradient id="leafBase" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#22c55e" />
+                  <stop offset="100%" stop-color="#14532d" />
+                </linearGradient>
+                <linearGradient id="goldTrim" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#fbbf24" />
+                  <stop offset="50%" stop-color="#fef08a" />
+                  <stop offset="100%" stop-color="#d97706" />
+                </linearGradient>
+              </defs>
+
+              <!-- Candle Glow -->
+              <circle cx="140" cy="52" r="48" fill="url(#candleGlow)" />
+
+              <!-- Incense Sticks (3) -->
+              <line x1="122" y1="115" x2="112" y2="42" stroke="#92400e" stroke-width="4" stroke-linecap="round" />
+              <line x1="140" y1="115" x2="140" y2="38" stroke="#92400e" stroke-width="4" stroke-linecap="round" />
+              <line x1="158" y1="115" x2="168" y2="42" stroke="#92400e" stroke-width="4" stroke-linecap="round" />
+              <circle cx="112" cy="41" r="4" fill="#fb7185" />
+              <circle cx="140" cy="37" r="4" fill="#fb7185" />
+              <circle cx="168" cy="41" r="4" fill="#fb7185" />
+
+              <!-- Candle -->
+              <rect x="132" y="64" width="16" height="58" rx="4" fill="#fef08a" stroke="#eab308" stroke-width="2" />
+              <path class="candle-flame" d="M140,34 Q150,50 140,64 Q130,50 140,34 Z" fill="#fb923c" />
+              <path class="candle-flame" d="M140,44 Q145,54 140,62 Q135,54 140,44 Z" fill="#fef08a" />
+
+              <!-- Back Lotus Petals -->
+              <path d="M56,140 Q72,88 100,118 Z" fill="#db2777" />
+              <path d="M84,136 Q104,76 128,118 Z" fill="#ec4899" />
+              <path d="M196,136 Q176,76 152,118 Z" fill="#ec4899" />
+              <path d="M224,140 Q208,88 180,118 Z" fill="#db2777" />
+              <path d="M114,134 Q140,70 166,134 Z" fill="#f472b6" />
+
+              <!-- Marigold Flowers -->
+              <circle cx="96" cy="132" r="14" fill="#f59e0b" />
+              <circle cx="96" cy="132" r="8" fill="#fde047" />
+              <circle cx="184" cy="132" r="14" fill="#f59e0b" />
+              <circle cx="184" cy="132" r="8" fill="#fde047" />
+              <circle cx="140" cy="136" r="16" fill="#f59e0b" />
+              <circle cx="140" cy="136" r="9" fill="#fef08a" />
+
+              <!-- Banana Leaf Base -->
+              <path d="M32,142 Q140,162 248,142 L222,182 Q140,202 58,182 Z" fill="url(#leafBase)" stroke="#166534" stroke-width="3" />
+              <!-- Gold Decorative Rim -->
+              <path d="M32,142 Q140,162 248,142 Q140,152 32,142 Z" fill="url(#goldTrim)" />
+
+              <!-- Folded Banana Leaf Points (กลีบกระทง) -->
+              <polygon points="44,142 60,116 76,145" fill="#16a34a" stroke="#14532d" stroke-width="2" />
+              <polygon points="74,145 92,118 110,148" fill="#22c55e" stroke="#14532d" stroke-width="2" />
+              <polygon points="108,148 140,120 172,148" fill="#16a34a" stroke="#14532d" stroke-width="2" />
+              <polygon points="170,148 188,118 206,145" fill="#22c55e" stroke="#14532d" stroke-width="2" />
+              <polygon points="204,145 220,116 236,142" fill="#16a34a" stroke="#14532d" stroke-width="2" />
+            </svg>
+            <div class="krathong-ripple"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Feedback FX -->
+      <div id="float-fx-layer"></div>
+
+      <!-- Fireworks Layer -->
+      <div id="fireworks-layer"></div>
+
+      <!-- Celebration Blessing Card Overlay -->
+      <div id="blessing-overlay">
+        <div class="blessing-card">
+          <div class="blessing-heading">คำอธิษฐานสมหวัง!</div>
+          <div class="blessing-body" id="blessing-body">ขอให้บุญรักษา เทวดาคุ้มครอง การงานราบรื่น เงินทองไหลมาเทมา</div>
+          <div class="blessing-wish-box">
+            <div class="blessing-wish-label">✨ คำอธิษฐานที่ลอยสู่ฝั่ง ✨</div>
+            <div class="blessing-wish-val" id="blessing-wish-val">"ขอให้ทุกคนพบเจอแต่ความสุข"</div>
+          </div>
+          <div class="blessing-supporter" id="blessing-supporter">
+            <img id="blessing-avatar" src="" alt="Supporter" />
+            <span id="blessing-supporter-name">ผู้ชมทางบ้าน</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulator / Test Panel (Hidden when ?clean=1) -->
+      <div id="sim-panel">
+        <div class="sim-top-row">
+          <span class="sim-title">🧪 ปุ่มจำลองเหตุการณ์ TikTok LIVE (ใส่ ?clean=1 ท้าย URL เพื่อซ่อน)</span>
+        </div>
+        <div class="sim-input-row">
+          <input type="text" class="sim-input" id="sim-wish-input" value="ขอพรให้ร่ำรวย สุขภาพแข็งแรง" placeholder="พิมพ์ข้อความทดสอบ..." />
+          <button class="sim-btn wish" onclick="simChatInput()">ส่งแชต</button>
+        </div>
+        <div class="sim-buttons">
+          <button class="sim-btn like" onclick="simLike()">❤️ กดใจ (+1)</button>
+          <button class="sim-btn spawn" onclick="simSpawnKrathong()">🪷 ลอยกระทง</button>
+          <button class="sim-btn wish" onclick="simWishPreset()">🙏 ขอพรสุ่ม</button>
+          <button class="sim-btn gift1" onclick="simGift(1)">🎁 ของขวัญ 1 เหรียญ</button>
+          <button class="sim-btn gift5" onclick="simGift(5)">🎆 ของขวัญ 5+ เหรียญ</button>
+          <button class="sim-btn greet" onclick="simJoinOrShare()">👋 เข้าใหม่ / แชร์</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== RESPONSIVE 1080x1920 SCALING ====================
+    function scaleStage() {
+      const wrapper = document.getElementById('viewport-wrapper');
+      const scaleX = window.innerWidth / 1080;
+      const scaleY = window.innerHeight / 1920;
+      const scale = Math.min(scaleX, scaleY);
+      wrapper.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', scaleStage);
+    scaleStage();
+
+    // ==================== CLEAN MODE (?clean=1) ====================
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('clean') === '1') {
+      document.body.classList.add('clean-mode');
+    }
+
+    // ==================== PURE SVG SCENE GENERATION ====================
+    function initSkyScene() {
+      const starsSvg = document.getElementById('stars-svg');
+      const ns = 'http://www.w3.org/2000/svg';
+      for (let i = 0; i < 65; i++) {
+        const c = document.createElementNS(ns, 'circle');
+        const x = Math.random() * 1080;
+        const y = Math.random() * 620;
+        const r = 1.2 + Math.random() * 2.6;
+        c.setAttribute('cx', x.toFixed(1));
+        c.setAttribute('cy', y.toFixed(1));
+        c.setAttribute('r', r.toFixed(1));
+        c.setAttribute('fill', Math.random() > 0.25 ? '#fef9c3' : '#bae6fd');
+        c.classList.add('star-twinkle');
+        c.style.setProperty('--dur', (2 + Math.random() * 3.5).toFixed(1) + 's');
+        c.style.setProperty('--delay', (Math.random() * 3).toFixed(1) + 's');
+        starsSvg.appendChild(c);
+      }
+
+      const lanternLayer = document.getElementById('lantern-layer');
+      for (let i = 0; i < 8; i++) {
+        const div = document.createElement('div');
+        div.className = 'sky-lantern';
+        div.style.left = (60 + Math.random() * 940).toFixed(0) + 'px';
+        div.style.setProperty('--rise-dur', (14 + Math.random() * 10).toFixed(1) + 's');
+        div.style.setProperty('--rise-delay', (Math.random() * 14).toFixed(1) + 's');
+        div.style.setProperty('--sway', ((Math.random() - 0.5) * 90).toFixed(0) + 'px');
+        const size = 28 + Math.random() * 24;
+        div.innerHTML = `
+          <svg viewBox="0 0 40 54" width="${size}" height="${size * 1.35}">
+            <defs>
+              <radialGradient id="lg${i}" cx="50%" cy="65%" r="55%">
+                <stop offset="0%" stop-color="#fffbeb" />
+                <stop offset="55%" stop-color="#fb923c" />
+                <stop offset="100%" stop-color="#b45309" />
+              </radialGradient>
+            </defs>
+            <path d="M8,10 Q20,0 32,10 L28,44 L12,44 Z" fill="url(#lg${i})" opacity="0.92" />
+            <ellipse cx="20" cy="44" rx="8" ry="2.5" fill="#78350f" />
+            <circle cx="20" cy="40" r="3" fill="#fef08a" />
+          </svg>`;
+        lanternLayer.appendChild(div);
+      }
+    }
+    initSkyScene();
+
+    // ==================== FALLBACK SVG AVATAR ====================
+    const FALLBACK_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="40" fill="#1e3a8a"/>
+        <circle cx="40" cy="30" r="14" fill="#fde68a"/>
+        <path d="M16,68 Q40,46 64,68" fill="#fbbf24"/>
+      </svg>
+    `);
+
+    function safeAvatar(url) {
+      return url && typeof url === 'string' && url.trim() !== '' ? url : FALLBACK_AVATAR;
+    }
+
+    // ==================== GAME STATE ====================
+    const MAX_CHECKPOINTS = 5;
+    const LIKES_PER_STEP = 2;
+    const CHECKPOINT_X = [175, 330, 485, 640, 795, 945];
+
+    const BLESSINGS = [
+      'ขอให้บุญรักษา เทวดาคุ้มครอง การงานราบรื่น เงินทองไหลมาเทมาไม่ขาดสาย!',
+      'ขอให้ชีวิตสว่างไสวราวแสงจันทร์วันเพ็ญ คิดสิ่งใดสมปรารถนาทุกประการ!',
+      'ขอให้ความทุกข์ลอยหายไปกับสายน้ำ มีแต่ความสุข ความเจริญ และรอยยิ้มตลอดปี!',
+      'ขอให้สุขภาพแข็งแรง โชคลาภพุ่งเข้าหา ก้าวหน้าในทุกสิ่งที่ตั้งใจ!',
+      'ขอให้พบรักแท้ มิตรภาพที่ดี และความสำเร็จอันยิ่งใหญ่ในเร็ววัน!'
+    ];
+
+    const state = {
+      checkpoint: 0,
+      likeBuffer: 0,
+      latestWish: 'ขอให้ทุกคนพบเจอแต่ความสุข ความเจริญรุ่งเรือง',
+      latestWishAuthor: 'ระบบอวยพร',
+      celebrating: false,
+      personalKrathongCount: 0
+    };
+
+    // ==================== UI RENDERING ====================
+    function updateUI() {
+      document.getElementById('progress-label').textContent = `จุดหมาย: จุดที่ ${state.checkpoint} / ${MAX_CHECKPOINTS}`;
+      document.getElementById('like-progress').textContent = `${state.likeBuffer}/${LIKES_PER_STEP}`;
+
+      const pct = (state.checkpoint / MAX_CHECKPOINTS) * 100;
+      document.getElementById('track-line-fill').style.width = `${pct}%`;
+
+      document.querySelectorAll('.cp-node').forEach(node => {
+        const step = Number(node.dataset.step);
+        node.classList.toggle('active', state.checkpoint >= step);
+      });
+
+      for (let i = 1; i <= MAX_CHECKPOINTS; i++) {
+        const buoy = document.getElementById(`buoy-${i}`);
+        if (buoy) buoy.classList.toggle('reached', state.checkpoint >= i);
+      }
+
+      const krathongWrap = document.getElementById('main-krathong-wrap');
+      const targetX = CHECKPOINT_X[Math.min(state.checkpoint, MAX_CHECKPOINTS)];
+      krathongWrap.style.left = `${targetX}px`;
+    }
+
+    function spawnFloatPop(text, x, y, color = '#ffd86b') {
+      const layer = document.getElementById('float-fx-layer');
+      const el = document.createElement('div');
+      el.className = 'float-pop';
+      el.textContent = text;
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      el.style.color = color;
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }
+
+    function advanceCheckpoints(steps, user = {}) {
+      if (state.celebrating || steps <= 0) return;
+
+      state.checkpoint = Math.min(MAX_CHECKPOINTS, state.checkpoint + steps);
+      updateUI();
+
+      const x = CHECKPOINT_X[state.checkpoint] - 40;
+      spawnFloatPop(`+${steps} จุด!`, x, 1020, '#ffd86b');
+
+      if (state.checkpoint >= MAX_CHECKPOINTS) {
+        triggerCelebration(user);
+      }
+    }
+
+    // ==================== GAME ACTIONS ====================
+    function handleLike(count = 1, user = {}) {
+      if (state.celebrating) return;
+      const likes = Math.max(1, Number(count) || 1);
+      state.likeBuffer += likes;
+
+      const x = CHECKPOINT_X[state.checkpoint] - 20;
+      spawnFloatPop(`❤️ +${likes}`, x, 1070, '#ff85b3');
+
+      if (state.likeBuffer >= LIKES_PER_STEP) {
+        const steps = Math.floor(state.likeBuffer / LIKES_PER_STEP);
+        state.likeBuffer = state.likeBuffer % LIKES_PER_STEP;
+        advanceCheckpoints(steps, user);
+      } else {
+        updateUI();
+      }
+    }
+
+    function handleWish(wishText, user = {}) {
+      const cleanWish = (wishText || '').trim();
+      if (!cleanWish) return;
+      const author = user.nickname || user.uniqueId || 'ผู้ชมทางบ้าน';
+
+      state.latestWish = cleanWish;
+      state.latestWishAuthor = author;
+
+      document.getElementById('wish-author').textContent = `คำอธิษฐานล่าสุดโดย ${author}`;
+      document.getElementById('wish-text').textContent = `"${cleanWish}"`;
+      document.getElementById('krathong-wish-tag').textContent = `🙏 ${cleanWish}`;
+
+      const x = CHECKPOINT_X[state.checkpoint] - 60;
+      spawnFloatPop('🙏 แปะคำอธิษฐาน!', x, 970, '#7dd3fc');
+    }
+
+    function spawnPersonalKrathong(user = {}) {
+      const container = document.getElementById('personal-krathongs');
+      if (container.children.length >= 10) {
+        container.removeChild(container.firstChild);
+      }
+
+      const name = user.nickname || user.uniqueId || 'ผู้ใจบุญ';
+      const avatar = safeAvatar(user.profilePictureUrl);
+      const topOffset = 10 + Math.random() * 250;
+      const dur = 11 + Math.random() * 6;
+
+      const el = document.createElement('div');
+      el.className = 'personal-krathong';
+      el.style.top = `${topOffset}px`;
+      el.style.setProperty('--float-dur', `${dur.toFixed(1)}s`);
+      el.innerHTML = `
+        <div class="pk-badge">
+          <img class="pk-avatar" src="${avatar}" onerror="this.src='${FALLBACK_AVATAR}'" alt="" />
+          <span class="pk-name">${escapeHtml(name)}</span>
+        </div>
+        <svg viewBox="0 0 110 80" width="110" height="80" style="filter: drop-shadow(0 8px 12px rgba(0,0,0,0.55));">
+          <ellipse cx="55" cy="60" rx="44" ry="14" fill="#15803d" />
+          <path d="M20,56 Q34,26 55,24 Q76,26 90,56 Z" fill="#f472b6" />
+          <path d="M32,56 Q42,32 55,30 Q68,32 78,56 Z" fill="#fbcfe8" />
+          <rect x="52" y="18" width="6" height="20" rx="2" fill="#fef08a" />
+          <path class="candle-flame" d="M55,6 Q60,13 55,19 Q50,13 55,6 Z" fill="#fb923c" />
+        </svg>
+      `;
+
+      container.appendChild(el);
+      setTimeout(() => el.remove(), dur * 1000);
+    }
+
+    function handleGift(coins = 1, user = {}) {
+      if (state.celebrating) return;
+      const amount = Number(coins) || 1;
+      const name = user.nickname || user.uniqueId || 'ผู้ใหญ่ใจดี';
+
+      if (amount >= 5) {
+        spawnFloatPop(`🎆 ${name} ส่ง ${amount} เหรียญ!`, 320, 940, '#f0abfc');
+        state.checkpoint = MAX_CHECKPOINTS;
+        updateUI();
+        triggerCelebration(user);
+      } else if (amount >= 1) {
+        spawnFloatPop(`🎁 ${name} +2 จุด!`, 360, 960, '#fde047');
+        advanceCheckpoints(2, user);
+      }
+    }
+
+    function showGreeting(type, user = {}) {
+      const container = document.getElementById('greeting-container');
+      while (container.children.length >= 2) {
+        container.removeChild(container.firstChild);
+      }
+
+      const name = user.nickname || user.uniqueId || 'เพื่อนใหม่';
+      const avatar = safeAvatar(user.profilePictureUrl);
+      const msg = type === 'share'
+        ? 'ขอบคุณที่ช่วยแชร์ไลฟ์! ขอให้โชคดีมีชัย 🌟'
+        : 'ยินดีต้อนรับสู่คืนลอยกระทงอธิษฐาน 🌕';
+
+      const toast = document.createElement('div');
+      toast.className = 'greet-toast';
+      toast.innerHTML = `
+        <img class="greet-avatar" src="${avatar}" onerror="this.src='${FALLBACK_AVATAR}'" alt="" />
+        <div class="greet-info">
+          <div class="greet-name">${escapeHtml(name)}</div>
+          <div class="greet-msg">${msg}</div>
+        </div>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('leaving');
+        setTimeout(() => toast.remove(), 420);
+      }, 3600);
+    }
+
+    // ==================== CELEBRATION & FIREWORKS ====================
+    function launchFireworkBurst(cx, cy) {
+      const layer = document.getElementById('fireworks-layer');
+      const colors = ['#ffd86b', '#ff6b9d', '#38bdf8', '#a855f7', '#4ade80'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      const burst = document.createElement('div');
+      burst.className = 'fw-burst';
+      burst.style.left = `${cx}px`;
+      burst.style.top = `${cy}px`;
+
+      const sparks = 18;
+      for (let i = 0; i < sparks; i++) {
+        const angle = (Math.PI * 2 * i) / sparks;
+        const dist = 110 + Math.random() * 140;
+        const sp = document.createElement('div');
+        sp.className = 'fw-spark';
+        sp.style.setProperty('--spark-color', color);
+        sp.style.setProperty('--tx', `${(Math.cos(angle) * dist).toFixed(1)}px`);
+        sp.style.setProperty('--ty', `${(Math.sin(angle) * dist).toFixed(1)}px`);
+        burst.appendChild(sp);
+      }
+
+      layer.appendChild(burst);
+      setTimeout(() => burst.remove(), 1400);
+    }
+
+    function triggerCelebration(user = {}) {
+      if (state.celebrating) return;
+      state.celebrating = true;
+
+      const blessing = BLESSINGS[Math.floor(Math.random() * BLESSINGS.length)];
+      const supporterName = user.nickname || user.uniqueId || state.latestWishAuthor || 'ผู้ชมทางบ้าน';
+      const avatar = safeAvatar(user.profilePictureUrl);
+
+      document.getElementById('blessing-body').textContent = blessing;
+      document.getElementById('blessing-wish-val').textContent = `"${state.latestWish}"`;
+      document.getElementById('blessing-supporter-name').textContent = `พลังใจจาก: ${supporterName}`;
+      const avatarEl = document.getElementById('blessing-avatar');
+      avatarEl.src = avatar;
+      avatarEl.onerror = () => { avatarEl.src = FALLBACK_AVATAR; };
+
+      document.getElementById('blessing-overlay').classList.add('show');
+
+      // Launch multiple fireworks
+      const burstPositions = [
+        [240, 320], [820, 290], [540, 220], [180, 560], [880, 520], [540, 420]
+      ];
+      burstPositions.forEach((pos, idx) => {
+        setTimeout(() => launchFireworkBurst(pos[0], pos[1]), idx * 320);
+      });
+      const fwTimer = setInterval(() => {
+        launchFireworkBurst(150 + Math.random() * 780, 180 + Math.random() * 480);
+      }, 650);
+
+      // Reset round after 6.5 seconds
+      setTimeout(() => {
+        clearInterval(fwTimer);
+        document.getElementById('blessing-overlay').classList.remove('show');
+        state.checkpoint = 0;
+        state.likeBuffer = 0;
+        state.celebrating = false;
+        updateUI();
+      }, 6500);
+    }
+
+    // ==================== WEBSOCKET BRIDGE (ws://localhost:8787) ====================
+    let ws = null;
+    let reconnectTimer = null;
+
+    function setWsStatus(status, text) {
+      const dot = document.getElementById('ws-dot');
+      const label = document.getElementById('ws-status-text');
+      dot.className = 'ws-dot ' + status;
+      label.textContent = text;
+    }
+
+    function connectWebSocket() {
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+      setWsStatus('', 'กำลังเชื่อมต่อ ws://localhost:8787...');
+
+      try {
+        ws = new WebSocket('ws://localhost:8787');
+      } catch (err) {
+        scheduleReconnect();
+        return;
+      }
+
+      ws.onopen = () => {
+        setWsStatus('connected', 'เชื่อมต่อ WS แล้ว');
+      };
+
+      ws.onmessage = (msg) => {
+        try {
+          const payload = JSON.parse(msg.data);
+          routeTikTokEvent(payload.event, payload.data || {});
+        } catch (e) {
+          console.warn('Invalid WS message:', e);
+        }
+      };
+
+      ws.onclose = () => {
+        setWsStatus('disconnected', 'หลุดการเชื่อมต่อ (กำลังต่อใหม่...)');
+        scheduleReconnect();
+      };
+
+      ws.onerror = () => {
+        setWsStatus('disconnected', 'เชื่อมต่อ WS ไม่สำเร็จ');
+      };
+    }
+
+    function scheduleReconnect() {
+      if (reconnectTimer) return;
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        connectWebSocket();
+      }, 3000);
+    }
+
+    function routeTikTokEvent(eventName, data) {
+      const ev = String(eventName || '').toLowerCase();
+
+      if (ev === 'like') {
+        handleLike(data.likeCount || data.likes || data.count || 1, data);
+      } else if (ev === 'chat' || ev === 'comment') {
+        const text = String(data.comment || data.message || data.text || '').trim();
+        if (!text) return;
+        if (text.includes('ลอยกระทง')) {
+          spawnPersonalKrathong(data);
+        }
+        if (text.startsWith('ขอพร') || text.includes('ขอพร')) {
+          handleWish(text, data);
+        }
+      } else if (ev === 'gift') {
+        const repeat = Number(data.repeatCount || 1);
+        const unitCoins = Number(data.diamondCount ?? data.coins ?? data.value ?? 1);
+        const totalCoins = unitCoins * (data.repeatEnd === false ? 1 : repeat);
+        handleGift(totalCoins, data);
+      } else if (ev === 'share') {
+        showGreeting('share', data);
+      } else if (ev === 'member' || ev === 'join') {
+        showGreeting('join', data);
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // ==================== SIMULATOR CONTROLS ====================
+    const SAMPLE_USERS = [
+      { nickname: 'น้องพลอย ✨', profilePictureUrl: '' },
+      { nickname: 'พี่ต้น สายบุญ', profilePictureUrl: '' },
+      { nickname: 'คุณมิ้นท์ 🪷', profilePictureUrl: '' },
+      { nickname: 'บอสเอ็ม', profilePictureUrl: '' }
+    ];
+    const SAMPLE_WISHES = [
+      'ขอพรให้ครอบครัวมีแต่ความสุข สุขภาพแข็งแรง',
+      'ขอพรให้การงานปังๆ ยอดขายทะลุเป้า',
+      'ขอพรให้ถูกหวยรวยเบอร์ เฮงๆ ปังๆ',
+      'ขอพรให้เจอแต่คนดีๆ สิ่งดีๆ เข้ามาในชีวิต'
+    ];
+
+    function randomUser() {
+      return SAMPLE_USERS[Math.floor(Math.random() * SAMPLE_USERS.length)];
+    }
+
+    function simLike() {
+      routeTikTokEvent('like', { ...randomUser(), likeCount: 1 });
+    }
+
+    function simChatInput() {
+      const input = document.getElementById('sim-wish-input');
+      const text = input.value.trim();
+      if (!text) return;
+      routeTikTokEvent('chat', { ...randomUser(), comment: text });
+    }
+
+    function simWishPreset() {
+      const w = SAMPLE_WISHES[Math.floor(Math.random() * SAMPLE_WISHES.length)];
+      routeTikTokEvent('chat', { ...randomUser(), comment: w });
+    }
+
+    function simSpawnKrathong() {
+      routeTikTokEvent('chat', { ...randomUser(), comment: 'ลอยกระทง' });
+    }
+
+    function simGift(coins) {
+      routeTikTokEvent('gift', { ...randomUser(), diamondCount: coins });
+    }
+
+    function simJoinOrShare() {
+      const ev = Math.random() > 0.5 ? 'share' : 'member';
+      routeTikTokEvent(ev, randomUser());
+    }
+
+    // ==================== THAI TRADITIONAL MUSIC (WEB AUDIO API) ====================
+    let audioCtx = null;
+    let musicPlaying = false;
+    let musicTimer = null;
+    let melodyStep = 0;
+
+    // Thai Pentatonic Scale (C5, D5, E5, G5, A5, C6, D6, E6)
+    const THAI_NOTES = {
+      C4: 261.63, D4: 293.66, E4: 329.63, G4: 392.00, A4: 440.00,
+      C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880.00,
+      C6: 1046.50
+    };
+
+    // Festive Loy Krathong-inspired Thai pentatonic melody loop
+    const MELODY_SEQ = [
+      ['G5', 1], ['E5', 1], ['G5', 1], ['A5', 1],
+      ['G5', 2], ['E5', 1], ['D5', 1],
+      ['C5', 1], ['D5', 1], ['E5', 1], ['G5', 1],
+      ['E5', 2], ['D5', 2],
+      ['E5', 1], ['G5', 1], ['A5', 1], ['C6', 1],
+      ['A5', 2], ['G5', 1], ['E5', 1],
+      ['D5', 1], ['E5', 1], ['G5', 1], ['E5', 1],
+      ['D5', 2], ['C5', 2]
+    ];
+
+    function playRanatNote(freq, durationSec = 0.42, vol = 0.12) {
+      if (!audioCtx || !musicPlaying) return;
+      const now = audioCtx.currentTime;
+
+      const osc = audioCtx.createOscillator();
+      const overtone = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+
+      overtone.type = 'sine';
+      overtone.frequency.setValueAtTime(freq * 2, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.exponentialRampToValueAtTime(vol, now + 0.018);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + durationSec);
+
+      const overGain = audioCtx.createGain();
+      overGain.gain.setValueAtTime(vol * 0.25, now);
+      overGain.gain.exponentialRampToValueAtTime(0.001, now + durationSec * 0.6);
+
+      osc.connect(gain);
+      overtone.connect(overGain);
+      overGain.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      overtone.start(now);
+      osc.stop(now + durationSec + 0.05);
+      overtone.stop(now + durationSec + 0.05);
+    }
+
+    function playChing(isOpen = true) {
+      if (!audioCtx || !musicPlaying) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(isOpen ? 2640 : 2100, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.exponentialRampToValueAtTime(isOpen ? 0.045 : 0.035, now + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0005, now + (isOpen ? 0.35 : 0.09));
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.4);
+    }
+
+    function scheduleNextThaiBeat() {
+      if (!musicPlaying) return;
+      const [noteName, beats] = MELODY_SEQ[melodyStep % MELODY_SEQ.length];
+      const freq = THAI_NOTES[noteName];
+      const beatMs = 360;
+
+      if (freq) {
+        playRanatNote(freq, (beats * beatMs) / 1000 * 1.15, 0.11);
+      }
+      // Subtle Khong Wong bass on every 4th step
+      if (melodyStep % 4 === 0 && freq) {
+        playRanatNote(freq / 2, 0.75, 0.07);
+      }
+      // Ching-Chab rhythm
+      if (melodyStep % 2 === 0) {
+        playChing(melodyStep % 4 === 0);
+      }
+
+      melodyStep++;
+      musicTimer = setTimeout(scheduleNextThaiBeat, beats * beatMs);
+    }
+
+    function startThaiMusic() {
+      const btn = document.getElementById('music-toggle-btn');
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      if (!musicPlaying) {
+        musicPlaying = true;
+        clearTimeout(musicTimer);
+        scheduleNextThaiBeat();
+      }
+      btn.textContent = '🔊 ดนตรีไทย: เปิด';
+    }
+
+    function toggleThaiMusic() {
+      const btn = document.getElementById('music-toggle-btn');
+      if (!musicPlaying) {
+        startThaiMusic();
+      } else {
+        musicPlaying = false;
+        clearTimeout(musicTimer);
+        btn.textContent = '🔇 ดนตรีไทย: ปิด';
+      }
+    }
+
+    function autoEnableMusic() {
+      startThaiMusic();
+      const unlock = () => {
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().then(() => {
+            if (musicPlaying) {
+              clearTimeout(musicTimer);
+              scheduleNextThaiBeat();
+            }
+          }).catch(() => {});
+        }
+        document.removeEventListener('pointerdown', unlock);
+        document.removeEventListener('keydown', unlock);
+      };
+      document.addEventListener('pointerdown', unlock, { once: true });
+      document.addEventListener('keydown', unlock, { once: true });
+    }
+
+    // Initialize
+    updateUI();
+    connectWebSocket();
+    autoEnableMusic();
+  </script>
+</body>
+</html>

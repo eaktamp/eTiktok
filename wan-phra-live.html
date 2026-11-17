@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>วันพระ ฟังธรรม ทำบุญ - TikTok LIVE</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&display=swap');
+
+    :root {
+      --gold: #ffd86b;
+      --saffron: #f59e0b;
+      --temple-red: #7f1d1d;
+      --temple-dark: #140c06;
+      --bg-top: #1c1008;
+      --bg-mid: #2b180b;
+      --bg-bot: #120904;
+      --card-bg: rgba(28, 16, 8, 0.84);
+      --card-border: rgba(255, 216, 107, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #0a0502;
+      font-family: 'Prompt', 'Noto Sans Thai', 'Segoe UI', Tahoma, sans-serif;
+      color: #fff;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    #viewport-wrapper {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+      transform-origin: center center;
+      flex-shrink: 0;
+    }
+
+    #stage {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 48%, #4a2810 0%, #241206 52%, #110803 100%);
+      box-shadow: 0 0 80px rgba(0, 0, 0, 0.9);
+    }
+
+    /* ==================== TEMPLE INTERIOR BACKGROUND ==================== */
+    .temple-backdrop {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .halo-spin {
+      transform-origin: 540px 260px;
+      animation: haloRotate 36s linear infinite;
+    }
+
+    @keyframes haloRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .halo-pulse {
+      animation: haloPulse 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes haloPulse {
+      0% { opacity: 0.65; transform: scale(0.96); }
+      100% { opacity: 1; transform: scale(1.04); }
+    }
+
+    .candle-flame {
+      transform-origin: center bottom;
+      animation: flicker 0.35s ease-in-out infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { transform: scaleY(0.92) scaleX(0.95) rotate(-2deg); opacity: 0.9; }
+      100% { transform: scaleY(1.08) scaleX(1.04) rotate(2deg); opacity: 1; }
+    }
+
+    .incense-smoke {
+      animation: smokeRise 5s ease-in-out infinite;
+    }
+
+    @keyframes smokeRise {
+      0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+      20% { opacity: 0.55; }
+      80% { opacity: 0.35; }
+      100% { transform: translateY(-70px) translateX(14px); opacity: 0; }
+    }
+
+    /* ==================== TOP CONTROLS ==================== */
+    #music-toggle-btn {
+      position: absolute;
+      top: 34px;
+      left: 48px;
+      z-index: 60;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(34, 18, 8, 0.9);
+      border: 2px solid rgba(255, 216, 107, 0.6);
+      border-radius: 999px;
+      padding: 8px 22px;
+      font-family: inherit;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fde68a;
+      cursor: pointer;
+    }
+
+    #ws-status-pill {
+      position: absolute;
+      top: 34px;
+      right: 48px;
+      z-index: 60;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(34, 18, 8, 0.9);
+      border: 1.5px solid rgba(255, 255, 255, 0.22);
+      border-radius: 999px;
+      padding: 8px 20px;
+      font-size: 26px;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .ws-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #f59e0b;
+    }
+    .ws-dot.connected { background: #22c55e; box-shadow: 0 0 12px #22c55e; }
+    .ws-dot.disconnected { background: #ef4444; }
+
+    /* ==================== HUD TOP ==================== */
+    .hud-top {
+      position: absolute;
+      top: 106px;
+      left: 48px;
+      right: 48px;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .title-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(245, 158, 11, 0.2);
+      border: 2px solid rgba(255, 216, 107, 0.6);
+      border-radius: 999px;
+      padding: 8px 26px;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .main-title {
+      font-size: 68px;
+      font-weight: 800;
+      line-height: 1.12;
+      background: linear-gradient(180deg, #fffbeb 0%, #ffd86b 55%, #d97706 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.85));
+    }
+
+    .sub-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #fef3c7;
+      margin-top: 6px;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.85);
+    }
+
+    /* Progress & Merit Card */
+    .progress-card {
+      position: absolute;
+      top: 308px;
+      left: 48px;
+      right: 48px;
+      background: var(--card-bg);
+      border: 2.5px solid var(--card-border);
+      border-radius: 30px;
+      padding: 18px 26px;
+      z-index: 20;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .progress-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .like-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(245, 158, 11, 0.22);
+      border: 2px solid rgba(255, 216, 107, 0.65);
+      border-radius: 999px;
+      padding: 6px 22px;
+      font-size: 27px;
+      font-weight: 700;
+      color: #fef3c7;
+    }
+
+    .checkpoints-track {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 8px 4px;
+    }
+
+    .track-line-bg {
+      position: absolute;
+      left: 36px;
+      right: 36px;
+      top: 40px;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .track-line-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #fef08a);
+      border-radius: 999px;
+      transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: 0 0 18px rgba(255, 216, 107, 0.8);
+    }
+
+    .cp-node {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 130px;
+    }
+
+    .cp-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #2b180b;
+      border: 4px solid rgba(255, 216, 107, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 800;
+      color: #cbd5e1;
+      transition: all 0.4s ease;
+    }
+
+    .cp-node.active .cp-circle {
+      background: linear-gradient(135deg, #fef08a, #f59e0b);
+      border-color: #fffbeb;
+      color: #451a03;
+      box-shadow: 0 0 24px rgba(255, 216, 107, 0.85);
+      transform: scale(1.08);
+    }
+
+    .cp-label {
+      font-size: 26px;
+      font-weight: 600;
+      color: #e2e8f0;
+      text-align: center;
+    }
+
+    .cp-node.active .cp-label {
+      color: var(--gold);
+    }
+
+    .rules-strip {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.14);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      font-size: 26px;
+      color: #fef3c7;
+    }
+
+    .rule-tag {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 5px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 216, 107, 0.25);
+    }
+
+    .rule-tag b {
+      color: var(--gold);
+    }
+
+    /* Wish Board */
+    .wish-board {
+      position: absolute;
+      top: 745px;
+      left: 48px;
+      right: 48px;
+      background: rgba(34, 18, 8, 0.88);
+      border: 2px solid rgba(255, 216, 107, 0.55);
+      border-radius: 24px;
+      padding: 14px 26px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.55);
+    }
+
+    .wish-icon {
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+      border-radius: 16px;
+      background: rgba(255, 216, 107, 0.14);
+      border: 2px solid rgba(255, 216, 107, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+    }
+
+    .wish-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .wish-meta {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--gold);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .wish-text {
+      font-size: 30px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ==================== GREETING TOASTS ==================== */
+    #greeting-container {
+      position: absolute;
+      top: 860px;
+      left: 48px;
+      right: 48px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .greet-toast {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: linear-gradient(90deg, rgba(69, 26, 3, 0.94), rgba(120, 53, 15, 0.92));
+      border: 2.5px solid var(--gold);
+      border-radius: 999px;
+      padding: 12px 28px 12px 14px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+      animation: toastSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .greet-toast.leaving {
+      animation: toastFadeOut 0.4s ease forwards;
+    }
+
+    @keyframes toastSlideIn {
+      0% { opacity: 0; transform: translateY(-20px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes toastFadeOut {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-16px); }
+    }
+
+    .greet-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid var(--gold);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .greet-info { flex: 1; min-width: 0; }
+    .greet-name {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--gold);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .greet-msg {
+      font-size: 26px;
+      font-weight: 600;
+      color: #fffbeb;
+    }
+
+    /* ==================== TEMPLE SANCTUARY STAGE ==================== */
+    .sanctuary-stage {
+      position: absolute;
+      top: 800px;
+      left: 0;
+      width: 1080px;
+      height: 720px;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    .monk-chant {
+      transform-origin: bottom center;
+      animation: monkChant 3.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes monkChant {
+      0% { transform: translateY(0px) rotate(-1deg); }
+      100% { transform: translateY(-3px) rotate(1deg); }
+    }
+
+    .bow-worship {
+      transform-origin: 45px 82px;
+      animation: bowWorship 3.8s ease-in-out infinite;
+    }
+
+    @keyframes bowWorship {
+      0%, 100% { transform: rotate(0deg); }
+      40%, 60% { transform: rotate(-28deg) translateY(6px); }
+    }
+
+    /* Devotee Congregation (Static + Dynamic Viewers who type สาธุ / ทำบุญ) */
+    #devotees-layer {
+      position: absolute;
+      top: 1280px;
+      left: 36px;
+      right: 36px;
+      height: 220px;
+      z-index: 18;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .devotee-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: devoteePop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes devoteePop {
+      0% { opacity: 0; transform: translateY(24px) scale(0.8); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .devotee-name-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(28, 16, 8, 0.9);
+      border: 2px solid rgba(255, 216, 107, 0.75);
+      border-radius: 999px;
+      padding: 3px 14px 3px 5px;
+      margin-bottom: 4px;
+    }
+
+    .devotee-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--gold);
+    }
+
+    .devotee-name {
+      font-size: 26px;
+      font-weight: 700;
+      color: #fef08a;
+      max-width: 240px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Floating Feedback & Golden Petals */
+    #float-fx-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 35;
+    }
+
+    .float-pop {
+      position: absolute;
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--gold);
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.9);
+      animation: popUp 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes popUp {
+      0% { opacity: 0; transform: translateY(20px) scale(0.75); }
+      20% { opacity: 1; transform: translateY(-10px) scale(1.08); }
+      100% { opacity: 0; transform: translateY(-110px) scale(1); }
+    }
+
+    .lotus-petal-fall {
+      position: absolute;
+      top: -40px;
+      animation: petalFall var(--fall-dur, 4s) linear forwards;
+    }
+
+    @keyframes petalFall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.95; }
+      100% { transform: translateY(1550px) translateX(var(--drift, 80px)) rotate(360deg); opacity: 0; }
+    }
+
+    /* ==================== DHAMMA BLESSING OVERLAY ==================== */
+    #blessing-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 45;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 54px 360px;
+      background: radial-gradient(circle at center, rgba(69, 26, 3, 0.72), rgba(15, 8, 3, 0.86));
+      backdrop-filter: blur(6px);
+    }
+
+    #blessing-overlay.show {
+      display: flex;
+      animation: fadeInOverlay 0.45s ease forwards;
+    }
+
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .blessing-card {
+      width: 100%;
+      background: linear-gradient(165deg, rgba(69, 26, 3, 0.96) 0%, rgba(28, 16, 8, 0.98) 100%);
+      border: 4px solid var(--gold);
+      border-radius: 44px;
+      padding: 46px 42px;
+      text-align: center;
+      box-shadow: 0 0 80px rgba(255, 216, 107, 0.5), 0 30px 70px rgba(0, 0, 0, 0.85);
+      animation: cardPop 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes cardPop {
+      0% { transform: scale(0.82); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .blessing-heading {
+      font-size: 66px;
+      font-weight: 800;
+      background: linear-gradient(180deg, #fffbeb 0%, #ffd86b 60%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 18px;
+    }
+
+    .blessing-body {
+      font-size: 36px;
+      font-weight: 700;
+      color: #fef3c7;
+      line-height: 1.45;
+      margin-bottom: 26px;
+    }
+
+    .blessing-wish-box {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 216, 107, 0.45);
+      border-radius: 24px;
+      padding: 20px 26px;
+      margin-bottom: 24px;
+    }
+
+    .blessing-wish-label {
+      font-size: 26px;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .blessing-wish-val {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .blessing-supporter {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255, 216, 107, 0.16);
+      border: 2px solid var(--gold);
+      border-radius: 999px;
+      padding: 10px 28px 10px 12px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fde68a;
+    }
+
+    .blessing-supporter img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      object-fit: cover;
+    }
+
+    /* ==================== SIMULATOR PANEL ==================== */
+    #sim-panel {
+      position: absolute;
+      bottom: 28px;
+      left: 36px;
+      right: 36px;
+      z-index: 60;
+      background: rgba(20, 11, 5, 0.94);
+      border: 2px solid rgba(255, 216, 107, 0.35);
+      border-radius: 28px;
+      padding: 18px 22px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    body.clean-mode #sim-panel,
+    body.clean-mode #ws-status-pill {
+      display: none !important;
+    }
+
+    .sim-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #fde68a;
+    }
+
+    .sim-input-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .sim-input {
+      flex: 1;
+      font-family: inherit;
+      font-size: 26px;
+      padding: 12px 18px;
+      border-radius: 16px;
+      border: 2px solid rgba(255, 216, 107, 0.3);
+      background: rgba(40, 22, 10, 0.95);
+      color: #ffffff;
+      outline: none;
+    }
+
+    .sim-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .sim-btn {
+      font-family: inherit;
+      font-size: 26px;
+      font-weight: 700;
+      padding: 14px 12px;
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      background: rgba(68, 36, 14, 0.92);
+      color: #fffbeb;
+      cursor: pointer;
+    }
+
+    .sim-btn.like { background: linear-gradient(135deg, #be185d, #ec4899); border-color: #f9a8d4; }
+    .sim-btn.sathu { background: linear-gradient(135deg, #b45309, #f59e0b); border-color: #fde68a; }
+    .sim-btn.wish { background: linear-gradient(135deg, #0369a1, #0ea5e9); border-color: #7dd3fc; }
+    .sim-btn.gift1 { background: linear-gradient(135deg, #047857, #10b981); border-color: #6ee7b7; }
+    .sim-btn.gift5 { background: linear-gradient(135deg, #7e22ce, #c026d3); border-color: #f0abfc; }
+    .sim-btn.greet { background: linear-gradient(135deg, #475569, #64748b); border-color: #cbd5e1; }
+  </style>
+</head>
+<body>
+  <div id="viewport-wrapper">
+    <div id="stage">
+      <!-- Music Toggle & WS Status -->
+      <button id="music-toggle-btn" onclick="toggleDhammaAudio()">🔊 เสียงธรรมะ: เปิด</button>
+      <div id="ws-status-pill">
+        <span class="ws-dot" id="ws-dot"></span>
+        <span id="ws-status-text">กำลังเชื่อมต่อ WS...</span>
+      </div>
+
+      <!-- Temple Architecture Backdrop -->
+      <svg class="temple-backdrop" viewBox="0 0 1080 1920" preserveAspectRatio="none">
+        <defs>
+          <radialGradient id="buddhaAura" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(255, 236, 153, 0.75)" />
+            <stop offset="45%" stop-color="rgba(245, 158, 11, 0.25)" />
+            <stop offset="100%" stop-color="rgba(245, 158, 11, 0)" />
+          </radialGradient>
+          <linearGradient id="pillarGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#450a0a" />
+            <stop offset="50%" stop-color="#991b1b" />
+            <stop offset="100%" stop-color="#450a0a" />
+          </linearGradient>
+        </defs>
+
+        <!-- Temple Red & Gold Pillars -->
+        <rect x="0" y="0" width="32" height="1540" fill="url(#pillarGrad)" />
+        <rect x="28" y="0" width="5" height="1540" fill="#d97706" />
+        <rect x="1048" y="0" width="32" height="1540" fill="url(#pillarGrad)" />
+        <rect x="1047" y="0" width="5" height="1540" fill="#d97706" />
+
+        <!-- Ornate Thai Arch Frame at Top -->
+        <path d="M32,0 L1048,0 L1048,68 Q540,104 32,68 Z" fill="rgba(69, 10, 10, 0.85)" stroke="#f59e0b" stroke-width="4" />
+
+        <!-- Temple Floor (Raised wooden & carpeted sanctuary floor) -->
+        <path d="M0,1260 L1080,1260 L1080,1920 L0,1920 Z" fill="#2e1608" />
+        <path d="M0,1260 L1080,1260 L1080,1320 L0,1320 Z" fill="#78350f" stroke="#f59e0b" stroke-width="3" />
+      </svg>
+
+      <!-- HUD Top -->
+      <div class="hud-top">
+        <div class="title-badge">🙏 วันพระใหญ่ • ธรรมะสว่างใจ • TikTok LIVE</div>
+        <h1 class="main-title">ร่วมบุญฟังธรรม วันพระ</h1>
+        <p class="sub-title">น้อมจิตฟังพระสวดมนต์ สะสมแต้มบุญรับคำสอนมงคล</p>
+      </div>
+
+      <!-- Progress & Merit Card -->
+      <div class="progress-card">
+        <div class="progress-header">
+          <div class="progress-title" id="progress-label">แต้มบุญ: 0 / 5 จุด</div>
+          <div class="like-pill">🙏 จิตศรัทธา <span id="like-progress">0/2</span></div>
+        </div>
+
+        <div class="checkpoints-track">
+          <div class="track-line-bg">
+            <div class="track-line-fill" id="track-line-fill"></div>
+          </div>
+          <div class="cp-node" data-step="1"><div class="cp-circle">1</div><div class="cp-label">สงบใจ</div></div>
+          <div class="cp-node" data-step="2"><div class="cp-circle">2</div><div class="cp-label">ตั้งจิต</div></div>
+          <div class="cp-node" data-step="3"><div class="cp-circle">3</div><div class="cp-label">รับศีล</div></div>
+          <div class="cp-node" data-step="4"><div class="cp-circle">4</div><div class="cp-label">ฟังธรรม</div></div>
+          <div class="cp-node" data-step="5"><div class="cp-circle">☸️</div><div class="cp-label">บุญเต็ม</div></div>
+        </div>
+
+        <div class="rules-strip">
+          <div class="rule-tag">❤️ กดใจ <b>2 ครั้ง</b> = +1 จุด</div>
+          <div class="rule-tag">🎁 <b>1 เหรียญ</b> = +2 จุด</div>
+          <div class="rule-tag">☸️ <b>5+ เหรียญ</b> = บุญเต็มรับพรทันที!</div>
+          <div class="rule-tag">💬 พิมพ์ <b>"สาธุ"</b> ร่วมนั่งฟังธรรม | <b>"ขอพร..."</b></div>
+        </div>
+      </div>
+
+      <!-- Latest Wish / Prayer Board -->
+      <div class="wish-board">
+        <div class="wish-icon">🪷</div>
+        <div class="wish-content">
+          <div class="wish-meta" id="wish-author">คำอธิษฐานจิตล่าสุด • พิมพ์ "ขอพร..." ในแชต</div>
+          <div class="wish-text" id="wish-text">"ขอให้จิตใจสงบร่มเย็น มีสติปัญญา และพบเจอแต่สิ่งดีงาม"</div>
+        </div>
+      </div>
+
+      <!-- Join / Share Greeting Container -->
+      <div id="greeting-container"></div>
+
+      <!-- Grand Buddha Statue, Chanting Monks & Altar -->
+      <div class="sanctuary-stage">
+        <svg viewBox="0 0 1080 720" width="1080" height="720">
+          <defs>
+            <linearGradient id="goldStatue" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fffbeb" />
+              <stop offset="35%" stop-color="#fde047" />
+              <stop offset="75%" stop-color="#f59e0b" />
+              <stop offset="100%" stop-color="#b45309" />
+            </linearGradient>
+            <linearGradient id="saffronRobe" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fb923c" />
+              <stop offset="100%" stop-color="#9a3412" />
+            </linearGradient>
+          </defs>
+
+          <!-- Radiant Aura (ฉัพพรรณรังสี) behind Grand Buddha -->
+          <circle class="halo-pulse" cx="540" cy="240" r="245" fill="url(#buddhaAura)" />
+          <g class="halo-spin" opacity="0.5">
+            <circle cx="540" cy="260" r="175" fill="none" stroke="#fde047" stroke-width="3" stroke-dasharray="14 14" />
+            <circle cx="540" cy="260" r="205" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 18" />
+          </g>
+
+          <!-- GRAND GOLDEN BUDDHA STATUE (พระใหญ่ปางสมาธิ) -->
+          <g transform="translate(540, 260)" style="filter: drop-shadow(0 14px 28px rgba(0,0,0,0.65));">
+            <!-- Flame Usnisa (พระเกตุมาลา) -->
+            <path d="M0,-168 Q10,-145 0,-128 Q-10,-145 0,-168 Z" fill="#fef08a" />
+            <!-- Head & Hair Curls -->
+            <ellipse cx="0" cy="-112" rx="34" ry="38" fill="url(#goldStatue)" />
+            <path d="M-34,-114 Q-32,-146 0,-146 Q32,-146 34,-114 Q20,-128 0,-128 Q-20,-128 -34,-114 Z" fill="#d97706" />
+            <!-- Ears -->
+            <path d="M-34,-118 Q-44,-112 -40,-84 Q-34,-82 -31,-94 Z" fill="url(#goldStatue)" />
+            <path d="M34,-118 Q44,-112 40,-84 Q34,-82 31,-94 Z" fill="url(#goldStatue)" />
+            <!-- Serene Face -->
+            <path d="M-16,-110 Q-10,-114 -4,-110" stroke="#78350f" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <path d="M4,-110 Q10,-114 16,-110" stroke="#78350f" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <path d="M-9,-94 Q0,-88 9,-94" stroke="#78350f" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <!-- Neck & Shoulders / Torso -->
+            <rect x="-14" y="-76" width="28" height="22" fill="url(#goldStatue)" />
+            <path d="M-76,-48 Q0,-64 76,-48 L92,74 L-92,74 Z" fill="url(#goldStatue)" />
+            <!-- Robe Fold (สังฆาฏิ) -->
+            <path d="M-28,-56 L-10,-56 L8,74 L-16,74 Z" fill="#d97706" opacity="0.65" />
+            <!-- Crossed Legs (ขัดสมาธิ) -->
+            <path d="M-128,88 Q-118,46 -54,54 L54,54 Q118,46 128,88 Q128,118 0,118 Q-128,118 -128,88 Z" fill="url(#goldStatue)" stroke="#b45309" stroke-width="2" />
+            <!-- Meditation Hands -->
+            <ellipse cx="0" cy="68" rx="34" ry="14" fill="#fef08a" stroke="#b45309" stroke-width="2" />
+
+            <!-- Golden Lotus Pedestal (ฐานบัวชุกชี) -->
+            <path d="M-150,118 Q0,134 150,118 L138,148 Q0,162 -138,148 Z" fill="#f59e0b" stroke="#78350f" stroke-width="2" />
+            <rect x="-165" y="148" width="330" height="26" rx="6" fill="#b45309" stroke="#fde047" stroke-width="2" />
+            <rect x="-185" y="174" width="370" height="32" rx="6" fill="#78350f" stroke="#f59e0b" stroke-width="2" />
+          </g>
+
+          <!-- Altar Candles & Incense Burner -->
+          <g transform="translate(540, 468)">
+            <!-- Left Candle -->
+            <rect x="-126" y="-44" width="14" height="44" rx="3" fill="#fef08a" stroke="#eab308" stroke-width="2" />
+            <path class="candle-flame" d="M-119,-68 Q-111,-54 -119,-44 Q-127,-54 -119,-68 Z" fill="#fb923c" />
+            <!-- Right Candle -->
+            <rect x="112" y="-44" width="14" height="44" rx="3" fill="#fef08a" stroke="#eab308" stroke-width="2" />
+            <path class="candle-flame" d="M119,-68 Q127,-54 119,-44 Q111,-54 119,-68 Z" fill="#fb923c" />
+            <!-- Golden Incense Bowl (กระถางธูป) -->
+            <path d="M-28,-22 L28,-22 L20,4 L-20,4 Z" fill="#fbbf24" stroke="#78350f" stroke-width="2" />
+            <line x1="-10" y1="-22" x2="-14" y2="-54" stroke="#92400e" stroke-width="3" />
+            <line x1="0" y1="-22" x2="0" y2="-58" stroke="#92400e" stroke-width="3" />
+            <line x1="10" y1="-22" x2="14" y2="-54" stroke="#92400e" stroke-width="3" />
+            <path class="incense-smoke" d="M0,-62 Q-10,-86 4,-108" stroke="rgba(255,255,255,0.45)" stroke-width="3" fill="none" stroke-linecap="round" />
+          </g>
+
+          <!-- CHANTING MONKS (พระภิกษุสงฆ์ห่มจีวรเฉียงบนอาสน์สงฆ์) -->
+          <!-- Monk Left 1 (พระอาจารย์ซ้าย) -->
+          <g transform="translate(175, 455)">
+            <!-- Raised Wooden Dais (อาสน์สงฆ์) -->
+            <rect x="-86" y="46" width="172" height="24" rx="4" fill="#78350f" stroke="#f59e0b" stroke-width="2" />
+            <rect x="-76" y="70" width="16" height="18" fill="#451a03" />
+            <rect x="60" y="70" width="16" height="18" fill="#451a03" />
+            <ellipse cx="0" cy="44" rx="66" ry="12" fill="#991b1b" stroke="#fbbf24" stroke-width="2" />
+            <g class="monk-chant">
+              <!-- Crossed Legs in Saffron Robe -->
+              <path d="M-54,42 Q-46,20 -12,24 L12,24 Q46,20 54,42 Q0,50 -54,42 Z" fill="#d97706" stroke="#9a3412" stroke-width="1.5" />
+              <!-- Bare Right Shoulder & Chest -->
+              <path d="M-32,-10 Q0,-18 32,-10 L38,34 L-38,34 Z" fill="#f1c27d" />
+              <!-- Saffron Robe Draped Over Left Shoulder (ห่มเฉียง) -->
+              <path d="M-34,-12 Q-10,-16 6,-4 L38,34 L-38,34 Z" fill="#ea580c" stroke="#9a3412" stroke-width="1.5" />
+              <!-- Sanghati Fold (สังฆาฏิพาดบ่าซ้าย) -->
+              <path d="M-28,-13 L-12,-14 L4,34 L-18,34 Z" fill="#c2410c" />
+              <!-- Right Arm & Hand holding Talapat -->
+              <path d="M28,-4 Q36,12 24,22" stroke="#f1c27d" stroke-width="9" fill="none" stroke-linecap="round" />
+              <!-- Shaved Head (ศีรษะโล้น) & Serene Face -->
+              <rect x="-7" y="-22" width="14" height="12" fill="#f1c27d" />
+              <ellipse cx="0" cy="-38" rx="19" ry="22" fill="#f1c27d" stroke="#d97706" stroke-width="1" />
+              <!-- Long Ears -->
+              <ellipse cx="-20" cy="-36" rx="3.5" ry="8" fill="#f1c27d" />
+              <ellipse cx="20" cy="-36" rx="3.5" ry="8" fill="#f1c27d" />
+              <!-- Calm Closed Eyes & Gentle Smile -->
+              <path d="M-10,-39 Q-6,-36 -2,-39" stroke="#5c2808" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path d="M2,-39 Q6,-36 10,-39" stroke="#5c2808" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path d="M-5,-29 Q0,-26 5,-29" stroke="#9a3412" stroke-width="1.8" fill="none" stroke-linecap="round" />
+              <!-- Talapat (ตาลปัตร) -->
+              <line x1="34" y1="42" x2="44" y2="-32" stroke="#78350f" stroke-width="4" />
+              <ellipse cx="44" cy="-42" rx="22" ry="26" fill="#991b1b" stroke="#fde047" stroke-width="3" />
+              <circle cx="44" cy="-42" r="8" fill="#fde047" />
+            </g>
+          </g>
+
+          <!-- Monk Right (พระอาจารย์ขวา) -->
+          <g transform="translate(905, 455)">
+            <!-- Raised Wooden Dais (อาสน์สงฆ์) -->
+            <rect x="-86" y="46" width="172" height="24" rx="4" fill="#78350f" stroke="#f59e0b" stroke-width="2" />
+            <rect x="-76" y="70" width="16" height="18" fill="#451a03" />
+            <rect x="60" y="70" width="16" height="18" fill="#451a03" />
+            <ellipse cx="0" cy="44" rx="66" ry="12" fill="#991b1b" stroke="#fbbf24" stroke-width="2" />
+            <g class="monk-chant" style="animation-delay: -1.6s;">
+              <path d="M-54,42 Q-46,20 -12,24 L12,24 Q46,20 54,42 Q0,50 -54,42 Z" fill="#d97706" stroke="#9a3412" stroke-width="1.5" />
+              <path d="M-32,-10 Q0,-18 32,-10 L38,34 L-38,34 Z" fill="#f1c27d" />
+              <path d="M-34,-12 Q-10,-16 6,-4 L38,34 L-38,34 Z" fill="#ea580c" stroke="#9a3412" stroke-width="1.5" />
+              <path d="M-28,-13 L-12,-14 L4,34 L-18,34 Z" fill="#c2410c" />
+              <rect x="-7" y="-22" width="14" height="12" fill="#f1c27d" />
+              <ellipse cx="0" cy="-38" rx="19" ry="22" fill="#f1c27d" stroke="#d97706" stroke-width="1" />
+              <ellipse cx="-20" cy="-36" rx="3.5" ry="8" fill="#f1c27d" />
+              <ellipse cx="20" cy="-36" rx="3.5" ry="8" fill="#f1c27d" />
+              <path d="M-10,-39 Q-6,-36 -2,-39" stroke="#5c2808" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path d="M2,-39 Q6,-36 10,-39" stroke="#5c2808" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path d="M-5,-29 Q0,-26 5,-29" stroke="#9a3412" stroke-width="1.8" fill="none" stroke-linecap="round" />
+              <!-- Palm-leaf Scripture (คัมภีร์ใบลาน) held in front -->
+              <rect x="-32" y="12" width="64" height="14" rx="3" fill="#fef3c7" stroke="#b45309" stroke-width="2" />
+              <line x1="-22" y1="19" x2="22" y2="19" stroke="#92400e" stroke-width="1.5" />
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Merit-Makers / Devotees Bowing & Listening to Dhamma -->
+      <div id="devotees-layer">
+        <!-- Crowd of 6 Devotees: Bowing (กราบพระ) & Wai (พนมมือ) -->
+        <div class="devotee-card">
+          <div class="devotee-name-pill"><span class="devotee-name">🙏 สาธุชน</span></div>
+          <svg viewBox="0 0 90 95" width="84" height="88">
+            <g class="bow-worship">
+              <path d="M18,90 Q24,42 45,42 Q66,42 72,90 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />
+              <circle cx="45" cy="24" r="14" fill="#f1c27d" />
+              <path d="M31,22 Q45,6 59,22 Q54,12 45,12 Q36,12 31,22 Z" fill="#1e1b18" />
+              <path d="M40,56 L45,40 L50,56 Z" fill="#f1c27d" stroke="#d97706" stroke-width="1.5" />
+            </g>
+          </svg>
+        </div>
+        <div class="devotee-card">
+          <div class="devotee-name-pill"><span class="devotee-name">🪷 คุณยายสายบุญ</span></div>
+          <svg viewBox="0 0 90 95" width="84" height="88">
+            <g class="bow-worship" style="animation-delay: -1.2s;">
+              <path d="M18,90 Q24,42 45,42 Q66,42 72,90 Z" fill="#fefce8" stroke="#fde047" stroke-width="2" />
+              <circle cx="45" cy="24" r="14" fill="#f1c27d" />
+              <circle cx="34" cy="18" r="6" fill="#d1d5db" />
+              <path d="M31,22 Q45,6 59,22 Q54,12 45,12 Q36,12 31,22 Z" fill="#d1d5db" />
+              <path d="M40,56 L45,40 L50,56 Z" fill="#f1c27d" stroke="#d97706" stroke-width="1.5" />
+            </g>
+          </svg>
+        </div>
+        <div class="devotee-card">
+          <div class="devotee-name-pill"><span class="devotee-name">🙏 กราบพระ</span></div>
+          <svg viewBox="0 0 90 95" width="84" height="88">
+            <g class="bow-worship" style="animation-delay: -0.6s;">
+              <path d="M18,90 Q24,42 45,42 Q66,42 72,90 Z" fill="#ffffff" stroke="#fde68a" stroke-width="2" />
+              <circle cx="45" cy="24" r="14" fill="#f1c27d" />
+              <path d="M31,22 Q45,6 59,22 Q54,12 45,12 Q36,12 31,22 Z" fill="#1e1b18" />
+              <path d="M40,56 L45,40 L50,56 Z" fill="#f1c27d" stroke="#d97706" stroke-width="1.5" />
+            </g>
+          </svg>
+        </div>
+        <div class="devotee-card">
+          <div class="devotee-name-pill"><span class="devotee-name">🪷 ผู้มีจิตศรัทธา</span></div>
+          <svg viewBox="0 0 90 95" width="84" height="88">
+            <g class="bow-worship" style="animation-delay: -2.1s;">
+              <path d="M18,90 Q24,42 45,42 Q66,42 72,90 Z" fill="#fffbeb" stroke="#fbbf24" stroke-width="2" />
+              <circle cx="45" cy="24" r="14" fill="#f1c27d" />
+              <circle cx="56" cy="18" r="6" fill="#1e1b18" />
+              <path d="M31,22 Q45,6 59,22 Q54,12 45,12 Q36,12 31,22 Z" fill="#1e1b18" />
+              <path d="M40,56 L45,40 L50,56 Z" fill="#f1c27d" stroke="#d97706" stroke-width="1.5" />
+            </g>
+          </svg>
+        </div>
+        <div class="devotee-card">
+          <div class="devotee-name-pill"><span class="devotee-name">🙏 น้องใบเฟิร์น</span></div>
+          <svg viewBox="0 0 90 95" width="84" height="88">
+            <g class="bow-worship" style="animation-delay: -1.7s;">
+              <path d="M18,90 Q24,42 45,42 Q66,42 72,90 Z" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2" />
+              <circle cx="45" cy="24" r="14" fill="#f1c27d" />
+              <path d="M31,22 Q45,6 59,22 Q54,12 45,12 Q36,12 31,22 Z" fill="#1e1b18" />
+              <path d="M40,56 L45,40 L50,56 Z" fill="#f1c27d" stroke="#d97706" stroke-width="1.5" />
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Floating Feedback FX & Petals -->
+      <div id="float-fx-layer"></div>
+
+      <!-- Dhamma Blessing Card Overlay -->
+      <div id="blessing-overlay">
+        <div class="blessing-card">
+          <div class="blessing-heading">อนุโมทนาสาธุ!</div>
+          <div class="blessing-body" id="blessing-body">ธรรมะย่อมรักษาผู้ประพฤติธรรม ขอให้ใจสงบ พบความสุขความเจริญตลอดไป</div>
+          <div class="blessing-wish-box">
+            <div class="blessing-wish-label">✨ คำอธิษฐานจิต ✨</div>
+            <div class="blessing-wish-val" id="blessing-wish-val">"ขอให้จิตใจสงบร่มเย็น"</div>
+          </div>
+          <div class="blessing-supporter">
+            <img id="blessing-avatar" src="" alt="Supporter" />
+            <span id="blessing-supporter-name">ผู้ร่วมบุญ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulator Panel (Hidden when ?clean=1) -->
+      <div id="sim-panel">
+        <span class="sim-title">🧪 ปุ่มจำลอง TikTok LIVE วันพระ (ใส่ ?clean=1 ท้าย URL เพื่อซ่อน)</span>
+        <div class="sim-input-row">
+          <input type="text" class="sim-input" id="sim-wish-input" value="ขอพรให้ครอบครัวร่มเย็นเป็นสุข สาธุ" placeholder="พิมพ์ข้อความทดสอบ..." />
+          <button class="sim-btn wish" onclick="simChatInput()">ส่งแชต</button>
+        </div>
+        <div class="sim-buttons">
+          <button class="sim-btn like" onclick="simLike()">❤️ กดใจ (+1)</button>
+          <button class="sim-btn sathu" onclick="simSathu()">🙏 พิมพ์ "สาธุ"</button>
+          <button class="sim-btn wish" onclick="simWishPreset()">🪷 ขอพรสุ่ม</button>
+          <button class="sim-btn gift1" onclick="simGift(1)">🎁 ทำบุญ 1 เหรียญ</button>
+          <button class="sim-btn gift5" onclick="simGift(5)">☸️ มหาบุญ 5+ เหรียญ</button>
+          <button class="sim-btn greet" onclick="simJoinOrShare()">👋 เข้าใหม่ / แชร์</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function scaleStage() {
+      const wrapper = document.getElementById('viewport-wrapper');
+      const scale = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+      wrapper.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', scaleStage);
+    scaleStage();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('clean') === '1') {
+      document.body.classList.add('clean-mode');
+    }
+
+    const FALLBACK_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="40" fill="#78350f"/>
+        <circle cx="40" cy="30" r="14" fill="#fde68a"/>
+        <path d="M16,68 Q40,46 64,68" fill="#f59e0b"/>
+      </svg>
+    `);
+
+    function safeAvatar(url) {
+      return url && typeof url === 'string' && url.trim() !== '' ? url : FALLBACK_AVATAR;
+    }
+
+    const MAX_CHECKPOINTS = 5;
+    const LIKES_PER_STEP = 2;
+
+    const DHAMMA_QUOTES = [
+      'จิตที่ฝึกดีแล้ว ย่อมนำความสุขมาให้ — ขอให้มีสติและปัญญาในทุกก้าวของชีวิต สาธุ!',
+      'ความสงบเย็นเป็นยอดแห่งความสุข ขอให้บุญรักษา เทวดาคุ้มครองตลอดวันพระนี้!',
+      'ผู้ให้ย่อมเป็นที่รัก ขอให้ผลบุญหนุนนำให้พบเจอแต่กัลยาณมิตรและความเจริญรุ่งเรือง!',
+      'สติมา ปัญญาเกิด — ขอให้พ้นจากทุกข์โศกโรคภัย มีแต่ความอิ่มเอมใจตลอดปี!'
+    ];
+
+    const state = {
+      checkpoint: 0,
+      likeBuffer: 0,
+      latestWish: 'ขอให้จิตใจสงบร่มเย็น มีสติปัญญา และพบเจอแต่สิ่งดีงาม',
+      latestWishAuthor: 'ศาลาฟังธรรม',
+      celebrating: false
+    };
+
+    function updateUI() {
+      document.getElementById('progress-label').textContent = `แต้มบุญ: ${state.checkpoint} / ${MAX_CHECKPOINTS} จุด`;
+      document.getElementById('like-progress').textContent = `${state.likeBuffer}/${LIKES_PER_STEP}`;
+      document.getElementById('track-line-fill').style.width = `${(state.checkpoint / MAX_CHECKPOINTS) * 100}%`;
+
+      document.querySelectorAll('.cp-node').forEach(node => {
+        node.classList.toggle('active', state.checkpoint >= Number(node.dataset.step));
+      });
+    }
+
+    function spawnFloatPop(text, x, y, color = '#ffd86b') {
+      const layer = document.getElementById('float-fx-layer');
+      const el = document.createElement('div');
+      el.className = 'float-pop';
+      el.textContent = text;
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      el.style.color = color;
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }
+
+    function spawnLotusPetals(count = 16) {
+      const layer = document.getElementById('float-fx-layer');
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          const p = document.createElement('div');
+          p.className = 'lotus-petal-fall';
+          p.style.left = `${40 + Math.random() * 980}px`;
+          p.style.setProperty('--fall-dur', `${3.2 + Math.random() * 2.2}s`);
+          p.style.setProperty('--drift', `${(Math.random() - 0.5) * 180}px`);
+          p.innerHTML = `<svg viewBox="0 0 28 36" width="26" height="34"><path d="M14,0 Q28,16 14,36 Q0,16 14,0 Z" fill="${Math.random() > 0.4 ? '#ffd86b' : '#f472b6'}" opacity="0.9"/></svg>`;
+          layer.appendChild(p);
+          setTimeout(() => p.remove(), 5500);
+        }, i * 140);
+      }
+    }
+
+    function advanceMerit(steps, user = {}) {
+      if (state.celebrating || steps <= 0) return;
+      state.checkpoint = Math.min(MAX_CHECKPOINTS, state.checkpoint + steps);
+      updateUI();
+      spawnFloatPop(`🙏 แต้มบุญ +${steps}`, 390, 960, '#fde047');
+      playTempleBell();
+      if (state.checkpoint >= MAX_CHECKPOINTS) {
+        triggerDhammaBlessing(user);
+      }
+    }
+
+    function handleLike(count = 1, user = {}) {
+      if (state.celebrating) return;
+      const likes = Math.max(1, Number(count) || 1);
+      state.likeBuffer += likes;
+      spawnFloatPop(`❤️ +${likes}`, 470, 1020, '#f9a8d4');
+
+      if (state.likeBuffer >= LIKES_PER_STEP) {
+        const steps = Math.floor(state.likeBuffer / LIKES_PER_STEP);
+        state.likeBuffer %= LIKES_PER_STEP;
+        advanceMerit(steps, user);
+      } else {
+        updateUI();
+      }
+    }
+
+    function handleWish(wishText, user = {}) {
+      const clean = (wishText || '').trim();
+      if (!clean) return;
+      const author = user.nickname || user.uniqueId || 'ผู้มีจิตศรัทธา';
+      state.latestWish = clean;
+      state.latestWishAuthor = author;
+      document.getElementById('wish-author').textContent = `คำอธิษฐานจิตโดย ${author}`;
+      document.getElementById('wish-text').textContent = `"${clean}"`;
+      spawnFloatPop('🪷 ตั้งจิตอธิษฐาน!', 350, 910, '#fef08a');
+    }
+
+    function spawnDevotee(user = {}) {
+      const layer = document.getElementById('devotees-layer');
+      if (layer.children.length >= 9) {
+        layer.removeChild(layer.firstChild);
+      }
+      const name = user.nickname || user.uniqueId || 'สาธุชน';
+      const avatar = safeAvatar(user.profilePictureUrl);
+      const card = document.createElement('div');
+      card.className = 'devotee-card';
+      card.innerHTML = `
+        <div class="devotee-name-pill">
+          <img class="devotee-avatar" src="${avatar}" onerror="this.src='${FALLBACK_AVATAR}'" alt="" />
+          <span class="devotee-name">${escapeHtml(name)}</span>
+        </div>
+        <svg viewBox="0 0 90 95" width="84" height="88">
+          <g class="bow-worship">
+            <path d="M18,90 Q24,42 45,42 Q66,42 72,90 Z" fill="#ffffff" stroke="#fde047" stroke-width="2" />
+            <circle cx="45" cy="24" r="14" fill="#f1c27d" />
+            <path d="M31,22 Q45,6 59,22 Q54,12 45,12 Q36,12 31,22 Z" fill="#1e1b18" />
+            <path d="M40,56 L45,40 L50,56 Z" fill="#f1c27d" stroke="#d97706" stroke-width="1.5" />
+          </g>
+        </svg>
+      `;
+      layer.appendChild(card);
+      spawnFloatPop(`🙏 ${name} สาธุ!`, 340, 1180, '#fde68a');
+    }
+
+    function handleGift(coins = 1, user = {}) {
+      if (state.celebrating) return;
+      const amount = Number(coins) || 1;
+      const name = user.nickname || user.uniqueId || 'ผู้ใหญ่ใจบุญ';
+      if (amount >= 5) {
+        spawnFloatPop(`☸️ ${name} ถวายมหาบุญ ${amount} เหรียญ!`, 230, 920, '#fef08a');
+        state.checkpoint = MAX_CHECKPOINTS;
+        updateUI();
+        triggerDhammaBlessing(user);
+      } else {
+        spawnFloatPop(`🎁 ${name} ทำบุญ +2 จุด!`, 320, 940, '#6ee7b7');
+        advanceMerit(2, user);
+      }
+    }
+
+    function showGreeting(type, user = {}) {
+      const container = document.getElementById('greeting-container');
+      while (container.children.length >= 2) {
+        container.removeChild(container.firstChild);
+      }
+      const name = user.nickname || user.uniqueId || 'กัลยาณมิตร';
+      const avatar = safeAvatar(user.profilePictureUrl);
+      const msg = type === 'share'
+        ? 'อนุโมทนาบุญที่ช่วยแชร์ธรรมะให้ผู้อื่น 🙏'
+        : 'ยินดีต้อนรับสู่ศาลาฟังธรรม วันพระ 🪷';
+
+      const toast = document.createElement('div');
+      toast.className = 'greet-toast';
+      toast.innerHTML = `
+        <img class="greet-avatar" src="${avatar}" onerror="this.src='${FALLBACK_AVATAR}'" alt="" />
+        <div class="greet-info">
+          <div class="greet-name">${escapeHtml(name)}</div>
+          <div class="greet-msg">${msg}</div>
+        </div>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('leaving');
+        setTimeout(() => toast.remove(), 420);
+      }, 3500);
+    }
+
+    function triggerDhammaBlessing(user = {}) {
+      if (state.celebrating) return;
+      state.celebrating = true;
+
+      const quote = DHAMMA_QUOTES[Math.floor(Math.random() * DHAMMA_QUOTES.length)];
+      const supporter = user.nickname || user.uniqueId || state.latestWishAuthor || 'ผู้ร่วมบุญ';
+      const avatar = safeAvatar(user.profilePictureUrl);
+
+      document.getElementById('blessing-body').textContent = quote;
+      document.getElementById('blessing-wish-val').textContent = `"${state.latestWish}"`;
+      document.getElementById('blessing-supporter-name').textContent = `อนุโมทนาบุญ: ${supporter}`;
+      const av = document.getElementById('blessing-avatar');
+      av.src = avatar;
+      av.onerror = () => { av.src = FALLBACK_AVATAR; };
+
+      document.getElementById('blessing-overlay').classList.add('show');
+      spawnLotusPetals(24);
+      playTempleBell(true);
+
+      setTimeout(() => {
+        document.getElementById('blessing-overlay').classList.remove('show');
+        state.checkpoint = 0;
+        state.likeBuffer = 0;
+        state.celebrating = false;
+        updateUI();
+      }, 6500);
+    }
+
+    // ==================== WEBSOCKET BRIDGE (ws://localhost:8787) ====================
+    let ws = null;
+    let reconnectTimer = null;
+
+    function setWsStatus(status, text) {
+      document.getElementById('ws-dot').className = 'ws-dot ' + status;
+      document.getElementById('ws-status-text').textContent = text;
+    }
+
+    function connectWebSocket() {
+      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      setWsStatus('', 'กำลังเชื่อมต่อ ws://localhost:8787...');
+      try { ws = new WebSocket('ws://localhost:8787'); } catch { scheduleReconnect(); return; }
+
+      ws.onopen = () => setWsStatus('connected', 'เชื่อมต่อ WS แล้ว');
+      ws.onmessage = (msg) => {
+        try {
+          const payload = JSON.parse(msg.data);
+          routeTikTokEvent(payload.event, payload.data || {});
+        } catch {}
+      };
+      ws.onclose = () => {
+        setWsStatus('disconnected', 'หลุดการเชื่อมต่อ (กำลังต่อใหม่...)');
+        scheduleReconnect();
+      };
+      ws.onerror = () => setWsStatus('disconnected', 'เชื่อมต่อ WS ไม่สำเร็จ');
+    }
+
+    function scheduleReconnect() {
+      if (reconnectTimer) return;
+      reconnectTimer = setTimeout(() => { reconnectTimer = null; connectWebSocket(); }, 3000);
+    }
+
+    function routeTikTokEvent(eventName, data) {
+      const ev = String(eventName || '').toLowerCase();
+      if (ev === 'like') {
+        handleLike(data.likeCount || data.likes || data.count || 1, data);
+      } else if (ev === 'chat' || ev === 'comment') {
+        const text = String(data.comment || data.message || data.text || '').trim();
+        if (!text) return;
+        if (text.includes('สาธุ') || text.includes('ทำบุญ')) spawnDevotee(data);
+        if (text.includes('ขอพร') || text.includes('อธิษฐาน')) handleWish(text, data);
+      } else if (ev === 'gift') {
+        const repeat = Number(data.repeatCount || 1);
+        const unit = Number(data.diamondCount ?? data.coins ?? data.value ?? 1);
+        handleGift(unit * (data.repeatEnd === false ? 1 : repeat), data);
+      } else if (ev === 'share') {
+        showGreeting('share', data);
+      } else if (ev === 'member' || ev === 'join') {
+        showGreeting('join', data);
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    // ==================== SERENE DHAMMA CHANT & BELL AUDIO ====================
+    let audioCtx = null;
+    let audioPlaying = false;
+    let chantTimer = null;
+    let chantIdx = 0;
+
+    // Slow, peaceful Buddhist chanting-inspired pentatonic drone & temple chimes
+    const CHANT_FREQS = [220, 261.63, 293.66, 261.63, 220, 196.00, 220, 261.63];
+
+    function playTempleBell(deep = false) {
+      if (!audioCtx || !audioPlaying) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const overtone = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(deep ? 392 : 523.25, now);
+      overtone.type = 'sine';
+      overtone.frequency.setValueAtTime(deep ? 784 : 1046.5, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.exponentialRampToValueAtTime(0.09, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0005, now + (deep ? 3.2 : 1.8));
+
+      const overGain = audioCtx.createGain();
+      overGain.gain.setValueAtTime(0.03, now);
+      overGain.gain.exponentialRampToValueAtTime(0.0005, now + 1.2);
+
+      osc.connect(gain);
+      overtone.connect(overGain);
+      overGain.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      overtone.start(now);
+      osc.stop(now + 3.4);
+      overtone.stop(now + 1.4);
+    }
+
+    function scheduleChantTone() {
+      if (!audioPlaying || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const freq = CHANT_FREQS[chantIdx % CHANT_FREQS.length];
+
+      const osc = audioCtx.createOscillator();
+      const sub = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      sub.type = 'triangle';
+      sub.frequency.setValueAtTime(freq / 2, now);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.055, now + 0.4);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.9);
+
+      const subGain = audioCtx.createGain();
+      subGain.gain.setValueAtTime(0.025, now);
+
+      osc.connect(gain);
+      sub.connect(subGain);
+      subGain.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      sub.start(now);
+      osc.stop(now + 2.0);
+      sub.stop(now + 2.0);
+
+      if (chantIdx % 8 === 0) playTempleBell(false);
+      chantIdx++;
+      chantTimer = setTimeout(scheduleChantTone, 1750);
+    }
+
+    function startDhammaAudio() {
+      const btn = document.getElementById('music-toggle-btn');
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+      if (!audioPlaying) {
+        audioPlaying = true;
+        clearTimeout(chantTimer);
+        scheduleChantTone();
+      }
+      btn.textContent = '🔊 เสียงธรรมะ: เปิด';
+    }
+
+    function toggleDhammaAudio() {
+      const btn = document.getElementById('music-toggle-btn');
+      if (!audioPlaying) {
+        startDhammaAudio();
+      } else {
+        audioPlaying = false;
+        clearTimeout(chantTimer);
+        btn.textContent = '🔇 เสียงธรรมะ: ปิด';
+      }
+    }
+
+    function autoEnableAudio() {
+      startDhammaAudio();
+      const unlock = () => {
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().then(() => {
+            if (audioPlaying) { clearTimeout(chantTimer); scheduleChantTone(); }
+          }).catch(() => {});
+        }
+      };
+      document.addEventListener('pointerdown', unlock, { once: true });
+      document.addEventListener('keydown', unlock, { once: true });
+    }
+
+    // ==================== SIMULATOR ====================
+    const SAMPLE_USERS = [
+      { nickname: 'แม่ชีน้อย 🙏', profilePictureUrl: '' },
+      { nickname: 'พี่บอย สายบุญ', profilePictureUrl: '' },
+      { nickname: 'คุณฝ้าย 🪷', profilePictureUrl: '' },
+      { nickname: 'น้องเก้า', profilePictureUrl: '' }
+    ];
+    const SAMPLE_WISHES = [
+      'ขอพรให้คุณพ่อคุณแม่สุขภาพแข็งแรง',
+      'ขอพรให้จิตใจผ่องใส การงานราบรื่น',
+      'ขอพรให้พ้นทุกข์โศก พบแต่ความสุขความเจริญ'
+    ];
+    const randomUser = () => SAMPLE_USERS[Math.floor(Math.random() * SAMPLE_USERS.length)];
+
+    function simLike() { routeTikTokEvent('like', { ...randomUser(), likeCount: 1 }); }
+    function simChatInput() {
+      const val = document.getElementById('sim-wish-input').value.trim();
+      if (val) routeTikTokEvent('chat', { ...randomUser(), comment: val });
+    }
+    function simSathu() { routeTikTokEvent('chat', { ...randomUser(), comment: 'สาธุ' }); }
+    function simWishPreset() {
+      const w = SAMPLE_WISHES[Math.floor(Math.random() * SAMPLE_WISHES.length)];
+      routeTikTokEvent('chat', { ...randomUser(), comment: w });
+    }
+    function simGift(coins) { routeTikTokEvent('gift', { ...randomUser(), diamondCount: coins }); }
+    function simJoinOrShare() {
+      routeTikTokEvent(Math.random() > 0.5 ? 'share' : 'member', randomUser());
+    }
+
+    updateUI();
+    connectWebSocket();
+    autoEnableAudio();
+  </script>
+</body>
+</html>

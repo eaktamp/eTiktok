@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>มหกรรมคอนเสิร์ตหมอลำซิ่งอีสาน - Ultra Live Stage</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800;900&display=swap');
+
+    :root {
+      --neon-pink: #ff2a85;
+      --neon-cyan: #00f0ff;
+      --neon-gold: #ffd700;
+      --neon-purple: #9d4edd;
+      --bg-night: #04020a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #020105;
+      font-family: 'Prompt', 'Noto Sans Thai', 'Segoe UI', sans-serif;
+      color: #fff;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    #viewport-wrapper {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+      transform-origin: center center;
+      flex-shrink: 0;
+    }
+
+    #stage {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 35%, #1c0836 0%, #090314 55%, #020105 100%);
+      box-shadow: 0 0 90px rgba(0, 0, 0, 0.95);
+    }
+
+    /* Dynamic Camera Container */
+    #camera-rig {
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 48%;
+      animation: cameraMotion 14s ease-in-out infinite alternate;
+    }
+
+    @keyframes cameraMotion {
+      0% { transform: scale(1) translate(0px, 0px); }
+      33% { transform: scale(1.022) translate(-8px, -4px); }
+      66% { transform: scale(1.015) translate(8px, -6px); }
+      100% { transform: scale(1.03) translate(0px, 4px); }
+    }
+
+    /* Fullscreen Concert Canvas (Lasers, Volumetric Beams, Crowd, Smoke, Pyro) */
+    #concert-canvas {
+      position: absolute;
+      inset: 0;
+      width: 1080px;
+      height: 1920px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ==================== TOP CONTROLS & HUD ==================== */
+    #ws-status-pill {
+      position: absolute;
+      top: 34px;
+      right: 36px;
+      z-index: 70;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 5, 30, 0.88);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      padding: 8px 20px;
+      font-size: 26px;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .ws-dot { width: 14px; height: 14px; border-radius: 50%; background: #f59e0b; }
+    .ws-dot.connected { background: #22c55e; box-shadow: 0 0 12px #22c55e; }
+    .ws-dot.disconnected { background: #ef4444; }
+
+    .hud-top {
+      position: absolute;
+      top: 104px;
+      left: 36px;
+      right: 36px;
+      z-index: 40;
+      pointer-events: none;
+      text-align: center;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(90deg, rgba(255, 42, 133, 0.28), rgba(157, 78, 221, 0.28));
+      border: 2px solid var(--neon-pink);
+      border-radius: 999px;
+      padding: 6px 26px;
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffe4e6;
+      box-shadow: 0 0 22px rgba(255, 42, 133, 0.5);
+      margin-bottom: 10px;
+    }
+
+    .main-title {
+      font-size: 66px;
+      font-weight: 900;
+      line-height: 1.08;
+      background: linear-gradient(180deg, #ffffff 0%, #ffd700 50%, #ff2a85 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 6px 20px rgba(255, 42, 133, 0.75));
+    }
+
+    .sub-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #67e8f9;
+      margin-top: 6px;
+      text-shadow: 0 3px 12px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Hype & Song Request Bar */
+    .hype-bar {
+      position: absolute;
+      top: 300px;
+      left: 44px;
+      right: 44px;
+      z-index: 40;
+      background: rgba(12, 4, 28, 0.78);
+      border: 2px solid rgba(0, 240, 255, 0.5);
+      border-radius: 26px;
+      padding: 14px 26px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+    }
+
+    .hype-info {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fde047;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hype-meter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 42, 133, 0.25);
+      border: 2px solid var(--neon-pink);
+      border-radius: 999px;
+      padding: 6px 20px;
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* ==================== CONCERT STAGE ARCHITECTURE (TRUSS, LED, LINE ARRAY) ==================== */
+    .stage-rig {
+      position: absolute;
+      top: 410px;
+      left: 0;
+      width: 1080px;
+      height: 760px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* Giant Rear LED Screen */
+    .led-wall {
+      position: absolute;
+      top: 120px;
+      left: 150px;
+      width: 780px;
+      height: 360px;
+      background: linear-gradient(135deg, #1e0538 0%, #4a044e 45%, #0f172a 100%);
+      border: 6px solid #334155;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(255, 42, 133, 0.55), inset 0 0 40px rgba(0, 240, 255, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .led-scanlines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.22) 0px, rgba(0,0,0,0.22) 2px, transparent 2px, transparent 5px);
+      pointer-events: none;
+    }
+
+    .led-banner-text {
+      font-size: 54px;
+      font-weight: 900;
+      text-align: center;
+      background: linear-gradient(90deg, #ffd700, #ff2a85, #00f0ff, #ffd700);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: ledShine 3s linear infinite;
+      padding: 0 24px;
+      z-index: 2;
+    }
+
+    .led-sub-text {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fef08a;
+      margin-top: 8px;
+      z-index: 2;
+      text-shadow: 0 0 14px rgba(255, 215, 0, 0.8);
+    }
+
+    @keyframes ledShine {
+      to { background-position: 200% center; }
+    }
+
+    .led-eq {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 110px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      padding: 0 20px;
+      opacity: 0.72;
+    }
+
+    .eq-bar {
+      width: 22px;
+      background: linear-gradient(180deg, #00f0ff, #ff2a85);
+      border-radius: 6px 6px 0 0;
+      animation: eqBounce var(--eq-dur, 0.45s) ease-in-out infinite alternate;
+    }
+
+    @keyframes eqBounce {
+      0% { height: 18px; }
+      100% { height: var(--eq-max, 95px); }
+    }
+
+    /* Performers & Hang Khrueang Animations */
+    .singer-dance {
+      transform-box: fill-box;
+      transform-origin: bottom center;
+      animation: singerGroove 0.48s ease-in-out infinite alternate;
+    }
+
+    @keyframes singerGroove {
+      0% { transform: translateY(0px) rotate(-2deg); }
+      100% { transform: translateY(-10px) rotate(2deg); }
+    }
+
+    .dancer-sync {
+      transform-box: fill-box;
+      transform-origin: bottom center;
+      animation: hangKhrueangDance 0.46s ease-in-out infinite alternate;
+    }
+
+    @keyframes hangKhrueangDance {
+      0% { transform: translateY(0px) skewX(-3deg); }
+      100% { transform: translateY(-12px) skewX(3deg); }
+    }
+
+    /* ==================== VIP / CROWD TOASTS & FX ==================== */
+    #greeting-container {
+      position: absolute;
+      top: 390px;
+      left: 44px;
+      right: 44px;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .greet-toast {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(90deg, rgba(88, 28, 135, 0.92), rgba(190, 24, 93, 0.92));
+      border: 2.5px solid var(--neon-gold);
+      border-radius: 999px;
+      padding: 10px 26px 10px 14px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+      animation: toastSlideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes toastSlideIn {
+      from { opacity: 0; transform: translateY(-18px) scale(0.94); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .greet-avatar {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      border: 2.5px solid var(--neon-gold);
+      object-fit: cover;
+    }
+
+    .greet-name { font-size: 28px; font-weight: 800; color: var(--neon-gold); }
+    .greet-msg { font-size: 26px; font-weight: 600; color: #fff; }
+
+    /* ==================== SIMULATOR PANEL ==================== */
+    #sim-panel {
+      position: absolute;
+      bottom: 26px;
+      left: 36px;
+      right: 36px;
+      z-index: 70;
+      background: rgba(10, 4, 22, 0.92);
+      border: 2px solid rgba(0, 240, 255, 0.4);
+      border-radius: 26px;
+      padding: 18px 22px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    body.clean-mode #sim-panel,
+    body.clean-mode #ws-status-pill {
+      display: none !important;
+    }
+
+    .sim-title { font-size: 26px; font-weight: 700; color: var(--neon-cyan); }
+    .sim-input-row { display: flex; gap: 12px; }
+    .sim-input {
+      flex: 1;
+      font-family: inherit;
+      font-size: 26px;
+      padding: 12px 18px;
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: rgba(24, 10, 48, 0.95);
+      color: #fff;
+      outline: none;
+    }
+
+    .sim-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .sim-btn {
+      font-family: inherit;
+      font-size: 26px;
+      font-weight: 700;
+      padding: 14px 10px;
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      color: #fff;
+      cursor: pointer;
+    }
+    .sim-btn.like { background: linear-gradient(135deg, #be185d, #ec4899); }
+    .sim-btn.dance { background: linear-gradient(135deg, #0369a1, #06b6d4); }
+    .sim-btn.song { background: linear-gradient(135deg, #6d28d9, #a855f7); }
+    .sim-btn.gift1 { background: linear-gradient(135deg, #b45309, #f59e0b); }
+    .sim-btn.gift5 { background: linear-gradient(135deg, #db2777, #f43f5e); }
+    .sim-btn.greet { background: linear-gradient(135deg, #334155, #475569); }
+  </style>
+</head>
+<body>
+  <div id="viewport-wrapper">
+    <div id="stage">
+      <!-- WS Status -->
+      <div id="ws-status-pill">
+        <span class="ws-dot" id="ws-dot"></span>
+        <span id="ws-status-text">กำลังเชื่อมต่อ WS...</span>
+      </div>
+
+      <!-- HUD Top -->
+      <div class="hud-top">
+        <div class="live-badge">⚡ LIVE CONCERT • มหกรรมหมอลำซิ่งอีสาน</div>
+        <h1 class="main-title">หมอลำซิ่ง เต็มระบบ 8K</h1>
+        <p class="sub-title">ม่วนซื่นหน้าฮ้าน • กดใจ 2 ครั้งปล่อยเลเซอร์ | พิมพ์ "ขอเพลง..."</p>
+      </div>
+
+      <!-- Hype & Song Request Bar -->
+      <div class="hype-bar">
+        <div class="hype-info" id="led-song-label">🎵 เพลงกำลังเล่น: สาวอีสานรอรัก (ซิ่งจังหวะโจ๊ะ)</div>
+        <div class="hype-meter">🔥 ความมันส์ <span id="hype-val">100%</span></div>
+      </div>
+
+      <div id="greeting-container"></div>
+
+      <!-- Dynamic Camera Rig -->
+      <div id="camera-rig">
+        <!-- Canvas for Volumetric Beams, Lasers, Smoke, Crowd of Hundreds + Phones -->
+        <canvas id="concert-canvas" width="1080" height="1920"></canvas>
+
+        <!-- Stage Architecture: Steel Truss, Giant LED Wall, Line Arrays, Performers, Band, 10 Hang Khrueang, Subwoofers -->
+        <div class="stage-rig">
+          <!-- Giant Rear LED Wall -->
+          <div class="led-wall">
+            <div class="led-scanlines"></div>
+            <div class="led-banner-text" id="led-main-text">หมอลำซิ่งอีสาน</div>
+            <div class="led-sub-text" id="led-sub-text">⚡ มหกรรมความมันส์ระดับประเทศ ⚡</div>
+            <div class="led-eq" id="led-eq"></div>
+          </div>
+
+          <svg viewBox="0 0 1080 760" width="1080" height="760" style="position:relative; z-index:4;">
+            <defs>
+              <linearGradient id="trussMetal" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#94a3b8" />
+                <stop offset="50%" stop-color="#475569" />
+                <stop offset="100%" stop-color="#1e293b" />
+              </linearGradient>
+              <linearGradient id="stageDeck" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#311042" />
+                <stop offset="100%" stop-color="#0f041c" />
+              </linearGradient>
+            </defs>
+
+            <!-- STEEL TRUSS RIG (โครงสร้างเหล็ก Truss บน + เสาซ้ายขวา) -->
+            <g stroke="#cbd5e1" stroke-width="2.5" fill="none" opacity="0.9">
+              <!-- Top Horizontal Truss -->
+              <rect x="20" y="20" width="1040" height="44" fill="rgba(30,41,59,0.75)" />
+              <path d="M20,20 L60,64 L100,20 L140,64 L180,20 L220,64 L260,20 L300,64 L340,20 L380,64 L420,20 L460,64 L500,20 L540,64 L580,20 L620,64 L660,20 L700,64 L740,20 L780,64 L820,20 L860,64 L900,20 L940,64 L980,20 L1020,64 L1060,20" />
+              <!-- Left & Right Vertical Truss Towers -->
+              <rect x="24" y="64" width="42" height="580" fill="rgba(30,41,59,0.75)" />
+              <path d="M24,64 L66,114 L24,164 L66,214 L24,264 L66,314 L24,364 L66,414 L24,464 L66,514 L24,564 L66,614" />
+              <rect x="1014" y="64" width="42" height="580" fill="rgba(30,41,59,0.75)" />
+              <path d="M1014,64 L1056,114 L1014,164 L1056,214 L1014,264 L1056,314 L1014,364 L1056,414 L1014,464 L1056,514 L1014,564 L1056,614" />
+            </g>
+
+            <!-- Par LED & Moving Head Fixtures along Top Truss -->
+            <g id="truss-lights">
+              <circle cx="140" cy="70" r="10" fill="#ff2a85" />
+              <circle cx="260" cy="70" r="10" fill="#00f0ff" />
+              <circle cx="380" cy="70" r="10" fill="#ffd700" />
+              <circle cx="540" cy="70" r="12" fill="#ffffff" />
+              <circle cx="700" cy="70" r="10" fill="#ffd700" />
+              <circle cx="820" cy="70" r="10" fill="#00f0ff" />
+              <circle cx="940" cy="70" r="10" fill="#ff2a85" />
+            </g>
+
+            <!-- HANGING LINE ARRAY SPEAKERS (ลำโพง Line Array แขวนซ้ายและขวา) -->
+            <g transform="translate(76, 85)">
+              <rect x="0" y="0" width="56" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+              <rect x="2" y="28" width="56" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+              <rect x="6" y="56" width="56" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+              <rect x="12" y="84" width="56" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+              <rect x="20" y="112" width="56" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+              <circle cx="14" cy="12" r="4" fill="#00f0ff" />
+              <circle cx="16" cy="40" r="4" fill="#00f0ff" />
+              <circle cx="20" cy="68" r="4" fill="#00f0ff" />
+            </g>
+            <g transform="translate(948, 85)">
+              <rect x="0" y="0" width="56" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+              <rect x="-2" y="28" width="56" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+              <rect x="-6" y="56" width="56" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+              <rect x="-12" y="84" width="56" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+              <rect x="-20" y="112" width="56" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+              <circle cx="42" cy="12" r="4" fill="#ff2a85" />
+              <circle cx="40" cy="40" r="4" fill="#ff2a85" />
+              <circle cx="36" cy="68" r="4" fill="#ff2a85" />
+            </g>
+
+            <!-- STAGE FLOOR & FRONT APRON -->
+            <polygon points="40,635 1040,635 1080,685 0,685" fill="url(#stageDeck)" stroke="#ff2a85" stroke-width="3" />
+            <rect x="0" y="685" width="1080" height="75" fill="#090312" />
+
+            <!-- LIVE MUSICIANS ON STAGE (กีตาร์ เบส คีย์บอร์ด กลองชุด และแคน) -->
+            <!-- Drummer (กลองชุด) Back-Left -->
+            <g transform="translate(215, 455)">
+              <circle cx="0" cy="-26" r="14" fill="#f1c27d" />
+              <rect x="-16" y="-10" width="32" height="36" rx="6" fill="#0ea5e9" />
+              <!-- Drum Kit -->
+              <circle cx="0" cy="24" r="24" fill="#1e293b" stroke="#ffd700" stroke-width="3" />
+              <ellipse cx="-26" cy="6" rx="14" ry="5" fill="#fde047" />
+              <ellipse cx="26" cy="6" rx="14" ry="5" fill="#fde047" />
+            </g>
+
+            <!-- Keyboardist (คีย์บอร์ด) Back-Right -->
+            <g transform="translate(865, 455)">
+              <circle cx="0" cy="-26" r="14" fill="#f1c27d" />
+              <rect x="-16" y="-10" width="32" height="36" rx="6" fill="#a855f7" />
+              <rect x="-34" y="12" width="68" height="12" rx="3" fill="#e2e8f0" stroke="#334155" stroke-width="2" />
+              <line x1="-22" y1="24" x2="-22" y2="48" stroke="#64748b" stroke-width="4" />
+              <line x1="22" y1="24" x2="22" y2="48" stroke="#64748b" stroke-width="4" />
+            </g>
+
+            <!-- Guitarist (กีตาร์) Left -->
+            <g transform="translate(310, 465)">
+              <g class="singer-dance">
+                <circle cx="0" cy="-32" r="14" fill="#f1c27d" />
+                <rect x="-14" y="-16" width="28" height="38" rx="6" fill="#ef4444" />
+                <path d="M-12,22 L-14,52 M12,22 L14,52" stroke="#1e293b" stroke-width="9" stroke-linecap="round" />
+                <!-- Electric Guitar -->
+                <path d="M-24,4 L26,-10" stroke="#fde047" stroke-width="5" />
+                <ellipse cx="-14" cy="6" rx="14" ry="9" fill="#fbbf24" stroke="#78350f" stroke-width="2" />
+              </g>
+            </g>
+
+            <!-- Khaen Player (หมอแคน) Center-Left -->
+            <g transform="translate(395, 468)">
+              <g class="singer-dance" style="animation-delay:-0.2s;">
+                <circle cx="0" cy="-32" r="14" fill="#f1c27d" />
+                <rect x="-14" y="-16" width="28" height="38" rx="6" fill="#f59e0b" />
+                <path d="M-10,22 L-12,52 M10,22 L12,52" stroke="#1e293b" stroke-width="9" stroke-linecap="round" />
+                <!-- Traditional Bamboo Khaen (แคนอีสาน) -->
+                <rect x="-6" y="-42" width="12" height="48" rx="2" fill="#fde68a" stroke="#92400e" stroke-width="1.5" />
+              </g>
+            </g>
+
+            <!-- Bassist (เบส) Right -->
+            <g transform="translate(770, 465)">
+              <g class="singer-dance" style="animation-delay:-0.35s;">
+                <circle cx="0" cy="-32" r="14" fill="#f1c27d" />
+                <rect x="-14" y="-16" width="28" height="38" rx="6" fill="#10b981" />
+                <path d="M-12,22 L-14,52 M12,22 L14,52" stroke="#1e293b" stroke-width="9" stroke-linecap="round" />
+                <path d="M-24,6 L30,-12" stroke="#38bdf8" stroke-width="5" />
+                <ellipse cx="-14" cy="8" rx="14" ry="9" fill="#0284c7" />
+              </g>
+            </g>
+
+            <!-- LEAD MOR LAM SINGERS (นักร้องหมอลำชายและหญิง ชุดอลังการ) -->
+            <!-- Male Singer -->
+            <g transform="translate(495, 490)">
+              <g class="singer-dance">
+                <!-- Feathered Gold/Neon Shoulder Epaulets -->
+                <path d="M-28,-22 L-42,-36 L-14,-24 Z" fill="#ffd700" />
+                <path d="M28,-22 L42,-36 L14,-24 Z" fill="#ffd700" />
+                <rect x="-18" y="-22" width="36" height="48" rx="8" fill="#be185d" stroke="#ffd700" stroke-width="2.5" />
+                <path d="M-12,26 L-14,68 M12,26 L14,68" stroke="#1e1b4b" stroke-width="11" stroke-linecap="round" />
+                <circle cx="0" cy="-42" r="17" fill="#f1c27d" />
+                <path d="M-16,-44 Q0,-64 16,-44 Z" fill="#18181b" />
+                <!-- Mic in Hand -->
+                <line x1="20" y1="-6" x2="10" y2="-32" stroke="#f1c27d" stroke-width="7" stroke-linecap="round" />
+                <circle cx="8" cy="-36" r="5" fill="#e2e8f0" />
+              </g>
+            </g>
+
+            <!-- Female Singer -->
+            <g transform="translate(585, 492)">
+              <g class="singer-dance" style="animation-delay:-0.25s;">
+                <!-- Sparkling Mor Lam Crown / Headdress -->
+                <path d="M-14,-54 L0,-76 L14,-54 Z" fill="#ffd700" stroke="#ff2a85" stroke-width="2" />
+                <circle cx="0" cy="-42" r="16" fill="#f1c27d" />
+                <!-- Glittering Dress + Feathered Skirt -->
+                <path d="M-16,-22 L16,-22 L28,36 L-28,36 Z" fill="#ec4899" stroke="#ffd700" stroke-width="2.5" />
+                <path d="M-10,36 L-12,66 M10,36 L12,66" stroke="#f1c27d" stroke-width="8" stroke-linecap="round" />
+                <line x1="-18" y1="-6" x2="-8" y2="-32" stroke="#f1c27d" stroke-width="6.5" stroke-linecap="round" />
+                <circle cx="-6" cy="-36" r="5" fill="#e2e8f0" />
+              </g>
+            </g>
+
+            <!-- 10 SYNCHRONIZED HANG KHRUEANG DANCERS (หางเครื่องหญิง 10 คน ชุดประดับเลื่อมคริสตัล) -->
+            <g id="hang-khrueang-row"></g>
+
+            <!-- LARGE SUBWOOFERS LINED ACROSS FRONT OF STAGE (ซับวูฟเฟอร์ขนาดใหญ่เรียงหน้าเวที) -->
+            <g id="subwoofers-row" transform="translate(0, 678)">
+              <!-- 8 Dual-18" Subwoofers -->
+              <g transform="translate(65, 0)"><rect width="98" height="68" rx="6" fill="#18181b" stroke="#475569" stroke-width="2.5"/><circle cx="28" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/><circle cx="70" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/></g>
+              <g transform="translate(185, 0)"><rect width="98" height="68" rx="6" fill="#18181b" stroke="#475569" stroke-width="2.5"/><circle cx="28" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/><circle cx="70" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/></g>
+              <g transform="translate(305, 0)"><rect width="98" height="68" rx="6" fill="#18181b" stroke="#475569" stroke-width="2.5"/><circle cx="28" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/><circle cx="70" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/></g>
+              <g transform="translate(425, 0)"><rect width="98" height="68" rx="6" fill="#18181b" stroke="#475569" stroke-width="2.5"/><circle cx="28" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/><circle cx="70" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/></g>
+              <g transform="translate(555, 0)"><rect width="98" height="68" rx="6" fill="#18181b" stroke="#475569" stroke-width="2.5"/><circle cx="28" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/><circle cx="70" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/></g>
+              <g transform="translate(675, 0)"><rect width="98" height="68" rx="6" fill="#18181b" stroke="#475569" stroke-width="2.5"/><circle cx="28" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/><circle cx="70" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/></g>
+              <g transform="translate(795, 0)"><rect width="98" height="68" rx="6" fill="#18181b" stroke="#475569" stroke-width="2.5"/><circle cx="28" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/><circle cx="70" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/></g>
+              <g transform="translate(915, 0)"><rect width="98" height="68" rx="6" fill="#18181b" stroke="#475569" stroke-width="2.5"/><circle cx="28" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/><circle cx="70" cy="34" r="18" fill="#09090b" stroke="#334155" stroke-width="3"/></g>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Simulator Panel (Hidden when ?clean=1) -->
+      <div id="sim-panel">
+        <span class="sim-title">🧪 ปุ่มจำลองคอนเสิร์ตหมอลำซิ่ง (ใส่ ?clean=1 ท้าย URL เพื่อซ่อน)</span>
+        <div class="sim-input-row">
+          <input type="text" class="sim-input" id="sim-song-input" value="ขอเพลง สาวเลยยังรอ" placeholder="พิมพ์ขอเพลง / ข้อความ..." />
+          <button class="sim-btn song" onclick="simChatInput()">ส่งแชต</button>
+        </div>
+        <div class="sim-buttons">
+          <button class="sim-btn like" onclick="simLike()">❤️ กดใจ (+เลเซอร์)</button>
+          <button class="sim-btn dance" onclick="simDance()">💃 เต้นหน้าฮ้าน</button>
+          <button class="sim-btn song" onclick="simSongPreset()">🎵 ขอเพลงสุ่ม</button>
+          <button class="sim-btn gift1" onclick="simGift(1)">🎁 มาลัย 1 เหรียญ</button>
+          <button class="sim-btn gift5" onclick="simGift(5)">🎆 มาลัยใหญ่ 5+ เหรียญ</button>
+          <button class="sim-btn greet" onclick="simJoinOrShare()">👋 เข้างาน / แชร์</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== 1080x1920 SCALING & CLEAN MODE ====================
+    function scaleStage() {
+      const wrapper = document.getElementById('viewport-wrapper');
+      const scale = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+      wrapper.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', scaleStage);
+    scaleStage();
+
+    if (new URLSearchParams(window.location.search).get('clean') === '1') {
+      document.body.classList.add('clean-mode');
+    }
+
+    // ==================== GENERATE LED EQUALIZER & 10 HANG KHRUEANG DANCERS ====================
+    const ledEq = document.getElementById('led-eq');
+    for (let i = 0; i < 24; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'eq-bar';
+      bar.style.setProperty('--eq-dur', (0.26 + Math.random() * 0.32).toFixed(2) + 's');
+      bar.style.setProperty('--eq-max', (45 + Math.random() * 65).toFixed(0) + 'px');
+      ledEq.appendChild(bar);
+    }
+
+    const hkRow = document.getElementById('hang-khrueang-row');
+    const ns = 'http://www.w3.org/2000/svg';
+    const hkColors = ['#ff2a85', '#00f0ff', '#ffd700', '#a855f7', '#22c55e'];
+    // 10 Hang Khrueang dancers (5 left of singers, 5 right of singers)
+    const hkPositions = [115, 182, 249, 316, 383, 697, 764, 831, 898, 965];
+    hkPositions.forEach((x, idx) => {
+      const g = document.createElementNS(ns, 'g');
+      g.setAttribute('transform', `translate(${x}, 555)`);
+      const color = hkColors[idx % hkColors.length];
+      g.innerHTML = `
+        <g class="dancer-sync" style="animation-delay:${(idx % 2 === 0 ? 0 : -0.23)}s">
+          <!-- Feathered Crystal Headdress -->
+          <path d="M-12,-46 L0,-66 L12,-46 Z" fill="#ffd700" stroke="${color}" stroke-width="1.5"/>
+          <circle cx="0" cy="-36" r="12" fill="#f1c27d"/>
+          <!-- Sequined Dress -->
+          <path d="M-13,-20 L13,-20 L22,26 L-22,26 Z" fill="${color}" stroke="#ffd700" stroke-width="1.8"/>
+          <!-- Arms Dancing -->
+          <path d="M-13,-14 L-26,-28 M13,-14 L26,-28" stroke="#f1c27d" stroke-width="5.5" stroke-linecap="round"/>
+          <!-- Legs -->
+          <path d="M-7,26 L-9,52 M7,26 L9,52" stroke="#f1c27d" stroke-width="6.5" stroke-linecap="round"/>
+        </g>`;
+      hkRow.appendChild(g);
+    });
+
+    // ==================== CONCERT CANVAS (LASERS, BEAMS, SMOKE, HUNDREDS IN CROWD + PHONES) ====================
+    const canvas = document.getElementById('concert-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Generate 260 crowd silhouettes in 6 depth rows from y=1170 to y=1780
+    const crowd = [];
+    for (let row = 0; row < 6; row++) {
+      const count = 38 + row * 6;
+      const baseY = 1185 + row * 95;
+      for (let i = 0; i < count; i++) {
+        crowd.push({
+          x: (i / count) * 1080 + (Math.random() - 0.5) * 24,
+          y: baseY + (Math.random() - 0.5) * 26,
+          scale: 0.72 + row * 0.14,
+          phase: Math.random() * Math.PI * 2,
+          hasPhone: Math.random() < 0.24,
+          armsUp: Math.random() < 0.45,
+          shirtHue: Math.floor(Math.random() * 360)
+        });
+      }
+    }
+
+    const smokePuffs = Array.from({ length: 22 }, () => ({
+      x: Math.random() * 1080,
+      y: 980 + Math.random() * 200,
+      r: 70 + Math.random() * 90,
+      vx: (Math.random() - 0.5) * 0.6,
+      alpha: 0.08 + Math.random() * 0.1
+    }));
+
+    let hypeLevel = 100;
+    let strobeFlash = 0;
+    let laserBoost = 0;
+
+    function renderConcert(timeMs) {
+      const t = timeMs * 0.001;
+      ctx.clearRect(0, 0, 1080, 1920);
+
+      // 1. Volumetric Moving-Head Light Beams from Top Truss (y=480)
+      const beamColors = ['rgba(255,42,133,0.22)', 'rgba(0,240,255,0.22)', 'rgba(255,215,0,0.2)', 'rgba(157,78,221,0.22)'];
+      const origins = [140, 260, 380, 540, 700, 820, 940];
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      origins.forEach((ox, i) => {
+        const angle = Math.sin(t * (1.4 + i * 0.15) + i) * 0.55;
+        const len = 950 + laserBoost * 220;
+        const endX = ox + Math.sin(angle) * len;
+        const endY = 480 + Math.cos(angle) * len;
+        const grad = ctx.createLinearGradient(ox, 480, endX, endY);
+        grad.addColorStop(0, beamColors[i % beamColors.length]);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(ox - 10, 480);
+        ctx.lineTo(ox + 10, 480);
+        ctx.lineTo(endX + 125, endY);
+        ctx.lineTo(endX - 125, endY);
+        ctx.closePath();
+        ctx.fill();
+      });
+
+      // Sharp Laser Lines
+      const laserCount = laserBoost > 0.2 ? 12 : 6;
+      for (let i = 0; i < laserCount; i++) {
+        const ox = 160 + (i / laserCount) * 760;
+        const sweep = Math.sin(t * 2.8 + i * 0.9) * 420;
+        ctx.strokeStyle = i % 2 === 0 ? 'rgba(0, 240, 255, 0.55)' : 'rgba(255, 42, 133, 0.55)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(ox, 485);
+        ctx.lineTo(ox + sweep, 1450);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // 2. Stage Smoke / Haze
+      smokePuffs.forEach(p => {
+        p.x += p.vx;
+        if (p.x < -120) p.x = 1200;
+        if (p.x > 1200) p.x = -120;
+        const g = ctx.createRadialGradient(p.x, p.y, 10, p.x, p.y, p.r);
+        g.addColorStop(0, `rgba(180, 130, 255, ${p.alpha})`);
+        g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 3. Crowd of Hundreds Dancing + Recording with Smartphones
+      const stageGlow = Math.sin(t * 5) * 0.5 + 0.5;
+      crowd.forEach(c => {
+        const bounce = Math.abs(Math.sin(t * 6.5 + c.phase)) * 9 * c.scale;
+        const cx = c.x;
+        const cy = c.y - bounce;
+        const s = c.scale;
+
+        // Crowd silhouette body
+        ctx.fillStyle = `hsl(${c.shirtHue}, 28%, ${8 + stageGlow * 8}%)`;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 28 * s, 16 * s, 26 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Head
+        ctx.fillStyle = '#120a1c';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 10 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Rim light reflection on head from stage
+        ctx.strokeStyle = stageGlow > 0.5 ? 'rgba(255,42,133,0.45)' : 'rgba(0,240,255,0.45)';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 10 * s, Math.PI, Math.PI * 2);
+        ctx.stroke();
+
+        // Raised hands / dancing
+        if (c.armsUp) {
+          ctx.strokeStyle = '#180d26';
+          ctx.lineWidth = 4.5 * s;
+          ctx.beginPath();
+          ctx.moveTo(cx - 10 * s, cy + 16 * s);
+          ctx.lineTo(cx - 18 * s, cy - 12 * s);
+          ctx.moveTo(cx + 10 * s, cy + 16 * s);
+          ctx.lineTo(cx + 18 * s, cy - 12 * s);
+          ctx.stroke();
+        }
+
+        // Glowing Smartphone Screen Recording the Concert
+        if (c.hasPhone) {
+          const px = cx + 14 * s;
+          const py = cy - 18 * s;
+          ctx.fillStyle = '#e0f2fe';
+          ctx.fillRect(px - 4 * s, py - 7 * s, 8 * s, 13 * s);
+          ctx.fillStyle = 'rgba(125, 211, 252, 0.35)';
+          ctx.beginPath();
+          ctx.arc(px, py, 14 * s, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // 4. Strobe Flash Decay
+      if (strobeFlash > 0.01) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${strobeFlash * 0.35})`;
+        ctx.fillRect(0, 0, 1080, 1920);
+        strobeFlash *= 0.86;
+      }
+      if (laserBoost > 0.01) laserBoost *= 0.96;
+
+      requestAnimationFrame(renderConcert);
+    }
+    requestAnimationFrame(renderConcert);
+
+    // ==================== TIKTOK LIVE WEBSOCKET (ws://localhost:8787) ====================
+    const FALLBACK_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><circle cx="40" cy="40" r="40" fill="#be185d"/><circle cx="40" cy="30" r="14" fill="#fde68a"/><path d="M16,68 Q40,46 64,68" fill="#00f0ff"/></svg>`);
+    const safeAvatar = (u) => (u && u.trim() ? u : FALLBACK_AVATAR);
+
+    function showToast(name, msg, avatarUrl) {
+      const c = document.getElementById('greeting-container');
+      while (c.children.length >= 2) c.removeChild(c.firstChild);
+      const el = document.createElement('div');
+      el.className = 'greet-toast';
+      el.innerHTML = `<img class="greet-avatar" src="${safeAvatar(avatarUrl)}" onerror="this.src='${FALLBACK_AVATAR}'" /><div><div class="greet-name">${name}</div><div class="greet-msg">${msg}</div></div>`;
+      c.appendChild(el);
+      setTimeout(() => el.remove(), 3200);
+    }
+
+    function routeTikTokEvent(evName, data = {}) {
+      const ev = String(evName || '').toLowerCase();
+      const name = data.nickname || data.uniqueId || 'สายซิ่งอีสาน';
+      if (ev === 'like') {
+        hypeLevel += Number(data.likeCount || 1) * 5;
+        document.getElementById('hype-val').textContent = `${hypeLevel}%`;
+        laserBoost = 1;
+      } else if (ev === 'chat' || ev === 'comment') {
+        const txt = String(data.comment || data.message || '').trim();
+        if (!txt) return;
+        if (txt.includes('ขอเพลง')) {
+          document.getElementById('led-song-label').textContent = `🎵 ขอเพลงโดย ${name}: ${txt}`;
+          document.getElementById('led-main-text').textContent = txt.replace('ขอเพลง', '').trim() || 'หมอลำซิ่งอีสาน';
+          strobeFlash = 0.8;
+        } else {
+          showToast(name, `💃 เต้นหน้าฮ้าน: "${txt}"`, data.profilePictureUrl);
+        }
+      } else if (ev === 'gift') {
+        const coins = Number(data.diamondCount || data.coins || 1);
+        strobeFlash = 1;
+        laserBoost = 1.5;
+        showToast(name, coins >= 5 ? `🎆 คล้องมาลัยใหญ่ ${coins} เหรียญ!!` : `🎁 คล้องมาลัย ${coins} เหรียญ!`, data.profilePictureUrl);
+      } else if (ev === 'share' || ev === 'member' || ev === 'join') {
+        showToast(name, ev === 'share' ? 'ขอบคุณที่แชร์ความมันส์หน้าฮ้าน! 🔥' : 'เข้างานคอนเสิร์ตหมอลำซิ่งแล้ว! ⚡', data.profilePictureUrl);
+      }
+    }
+
+    let ws = null;
+    function connectWS() {
+      const dot = document.getElementById('ws-dot');
+      const txt = document.getElementById('ws-status-text');
+      try { ws = new WebSocket('ws://localhost:8787'); } catch { setTimeout(connectWS, 3000); return; }
+      ws.onopen = () => { dot.className = 'ws-dot connected'; txt.textContent = 'เชื่อมต่อ WS แล้ว'; };
+      ws.onmessage = (m) => { try { const p = JSON.parse(m.data); routeTikTokEvent(p.event, p.data); } catch {} };
+      ws.onclose = () => { dot.className = 'ws-dot disconnected'; txt.textContent = 'หลุดการเชื่อมต่อ (กำลังต่อใหม่...)'; setTimeout(connectWS, 3000); };
+    }
+
+    // Simulator helpers
+    const USERS = [{ nickname: 'บ่าวไทบ้าน ⚡' }, { nickname: 'น้องแพรว สายซิ่ง' }, { nickname: 'อ้ายทิด 🎤' }];
+    const SONGS = ['ขอเพลง สาวเลยยังรอ', 'ขอเพลง ผู้สาวขาเลาะ', 'ขอเพลง ไหง่ง่อง'];
+    const ru = () => USERS[Math.floor(Math.random() * USERS.length)];
+    function simLike() { routeTikTokEvent('like', { ...ru(), likeCount: 2 }); }
+    function simDance() { routeTikTokEvent('chat', { ...ru(), comment: 'เต้นหน้าฮ้านม่วนคัก!' }); }
+    function simSongPreset() { routeTikTokEvent('chat', { ...ru(), comment: SONGS[Math.floor(Math.random() * SONGS.length)] }); }
+    function simChatInput() { const v = document.getElementById('sim-song-input').value; if (v) routeTikTokEvent('chat', { ...ru(), comment: v }); }
+    function simGift(c) { routeTikTokEvent('gift', { ...ru(), diamondCount: c }); }
+    function simJoinOrShare() { routeTikTokEvent(Math.random() > 0.5 ? 'share' : 'member', ru()); }
+
+    connectWS();
+  </script>
+</body>
+</html>
