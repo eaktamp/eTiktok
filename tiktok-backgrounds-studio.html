@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TikTok LIVE Background Studio - คลังฉากหลัง 8 หมวด & ตัวจัดการตั้งค่า</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --bg-app: #0b0e17;
+      --bg-panel: #121726;
+      --bg-card: #192033;
+      --bg-card-hover: #212a42;
+      --border: rgba(255, 255, 255, 0.09);
+      --border-active: #ff2d55;
+      --text-main: #f3f6fc;
+      --text-muted: #93a1be;
+      --accent: #ff2d55;
+      --accent-2: #00f2ea;
+      --gold: #ffd166;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-app);
+      color: var(--text-main);
+      font-family: 'Prompt', 'Noto Sans Thai', system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+    }
+
+    /* ==================== LAYOUT ==================== */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .app-shell.live-mode {
+      grid-template-columns: 1fr;
+    }
+
+    .app-shell.live-mode .sidebar {
+      display: none;
+    }
+
+    .app-shell.live-mode .stage-area {
+      padding: 0;
+      background: #000;
+    }
+
+    .app-shell.live-mode .stage-toolbar {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .app-shell.live-mode:hover .stage-toolbar.hover-reveal {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ==================== SIDEBAR ==================== */
+    .sidebar {
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 20;
+    }
+
+    .brand-header {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(255, 45, 85, 0.12), rgba(0, 242, 234, 0.08));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 16px;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(255, 45, 85, 0.35);
+      flex-shrink: 0;
+    }
+
+    .brand-title h1 {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .brand-title p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Tabs */
+    .nav-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-tab {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .nav-tab:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .nav-tab.active {
+      background: var(--bg-card);
+      color: #fff;
+      box-shadow: inset 0 0 0 1px rgba(255, 45, 85, 0.5);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+    }
+
+    .sidebar-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 99px;
+    }
+
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* ==================== CATEGORY CHIPS & SCENE GRID ==================== */
+    .category-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .cat-pill {
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 6px 10px;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: 0.18s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .cat-pill:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
+
+    .cat-pill.active {
+      background: linear-gradient(135deg, rgba(255, 45, 85, 0.28), rgba(0, 242, 234, 0.18));
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 12px 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .scenes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .scene-card {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      background: var(--bg-card);
+      cursor: pointer;
+      transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+    }
+
+    .scene-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .scene-card.active {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 2px rgba(0, 242, 234, 0.25);
+    }
+
+    .scene-thumb {
+      height: 110px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scene-thumb-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 99px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(4px);
+      color: #fff;
+    }
+
+    .scene-meta {
+      padding: 8px 10px;
+    }
+
+    .scene-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .scene-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ==================== FORM CONTROLS ==================== */
+    .control-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .control-group-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+    }
+
+    .field-row {
+      margin-bottom: 10px;
+    }
+    .field-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .field-val {
+      color: var(--accent-2);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="url"],
+    select,
+    textarea {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 12.5px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent-2);
+    }
+
+    .color-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .color-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .color-picker-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 6px;
+    }
+
+    input[type="color"] {
+      width: 26px;
+      height: 24px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .hex-mini {
+      font-size: 11px;
+      color: #fff;
+      font-family: monospace;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      padding: 4px 0;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider-switch {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 99px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .slider-switch::before {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .switch input:checked + .slider-switch {
+      background: var(--accent);
+    }
+    .switch input:checked + .slider-switch::before {
+      transform: translateX(18px);
+    }
+
+    /* Buttons */
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--bg-card-hover);
+      color: #fff;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: 0.18s;
+    }
+    .btn:hover {
+      background: #2b3654;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #d91e48);
+      border-color: transparent;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.1);
+    }
+    .btn-cyan {
+      background: linear-gradient(135deg, #00c4bd, #0088a8);
+      border-color: transparent;
+    }
+    .btn-sm {
+      padding: 5px 9px;
+      font-size: 11px;
+    }
+    .btn-block {
+      width: 100%;
+    }
+
+    /* ==================== KEYWORD HELPER CARDS ==================== */
+    .kw-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px;
+      margin-bottom: 10px;
+    }
+    .kw-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .kw-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .kw-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.28);
+      padding: 6px 8px;
+      border-radius: 7px;
+      font-size: 11.5px;
+    }
+    .kw-text {
+      color: #dbe6ff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .kw-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .kw-link {
+      text-decoration: none;
+      font-size: 10.5px;
+      padding: 3px 6px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent-2);
+      font-weight: 600;
+    }
+    .kw-link:hover {
+      background: rgba(0, 242, 234, 0.2);
+    }
+
+    /* ==================== STAGE PREVIEW AREA ==================== */
+    .stage-area {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: radial-gradient(circle at center, #182036 0%, #070a12 100%);
+      overflow: hidden;
+    }
+
+    .stage-toolbar {
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 15;
+      transition: opacity 0.25s;
+    }
+
+    .toolbar-pill {
+      background: rgba(12, 16, 28, 0.78);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .stage-frame-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .stage-viewport {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.12);
+      background: #000;
+      transform-origin: center center;
+    }
+
+    .app-shell.live-mode .stage-viewport {
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    #bg-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #custom-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    #fx-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .stage-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .stage-text-overlay {
+      position: absolute;
+      left: 60px;
+      right: 60px;
+      text-align: center;
+      pointer-events: none;
+      z-index: 6;
+      transition: all 0.25s ease;
+    }
+    .stage-text-overlay.pos-top { top: 180px; }
+    .stage-text-overlay.pos-center { top: 50%; transform: translateY(-50%); }
+    .stage-text-overlay.pos-bottom { bottom: 320px; }
+
+    .overlay-title {
+      font-weight: 800;
+      line-height: 1.2;
+      text-shadow: 0 6px 24px rgba(0, 0, 0, 0.75), 0 2px 6px rgba(0, 0, 0, 0.9);
+      letter-spacing: 0.5px;
+    }
+    .overlay-sub {
+      margin-top: 14px;
+      font-weight: 500;
+      opacity: 0.92;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.85);
+    }
+
+    /* TikTok Safe Zone Guide */
+    .safe-zone-guide {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      display: none;
+    }
+    .safe-zone-guide.visible {
+      display: block;
+    }
+    .sz-top {
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 150px;
+      background: rgba(255, 45, 85, 0.16);
+      border-bottom: 2px dashed rgba(255, 45, 85, 0.7);
+      display: flex; align-items: flex-end; justify-content: center;
+      padding-bottom: 8px; font-size: 22px; color: #ffd6de; font-weight: 600;
+    }
+    .sz-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 320px;
+      background: rgba(0, 242, 234, 0.14);
+      border-top: 2px dashed rgba(0, 242, 234, 0.7);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 12px; font-size: 22px; color: #c7fffd; font-weight: 600;
+    }
+    .sz-right {
+      position: absolute;
+      right: 0; top: 55%; bottom: 320px; width: 140px;
+      background: rgba(255, 209, 102, 0.14);
+      border-left: 2px dashed rgba(255, 209, 102, 0.7);
+      writing-mode: vertical-rl;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: #fff1c2; font-weight: 600;
+    }
+
+    /* Saved Presets List */
+    .saved-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+    }
+    .saved-item-info {
+      overflow: hidden;
+    }
+    .saved-item-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .saved-item-meta {
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(15, 22, 38, 0.95);
+      border: 1px solid var(--accent-2);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: 0.25s;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 920px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: 48vh 52vh;
+      }
+      .sidebar {
+        height: auto;
+        order: 2;
+      }
+      .stage-area {
+        order: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" id="app-shell">
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <div class="brand-title">
+          <div class="brand-badge">9:16</div>
+          <div>
+            <h1>TikTok LIVE Background Studio</h1>
+            <p>52 ฉากพร้อมใช้ 8 หมวด • ปรับค่า & ส่งออก 1080×1920</p>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-primary" id="btn-live-mode" title="ซ่อนเมนูเพื่อใช้ไลฟ์หรือแคปจอ (กด ESC เพื่อออก)">
+          📺 โหมดไลฟ์
+        </button>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="scenes">🎨<span>เลือกฉาก</span></button>
+        <button class="nav-tab" data-tab="customize">🎛️<span>ตั้งค่าสี/แสง</span></button>
+        <button class="nav-tab" data-tab="overlay">📝<span>ข้อความ/ขนาด</span></button>
+        <button class="nav-tab" data-tab="keywords">🔍<span>หาภาพฟรี</span></button>
+      </nav>
+
+      <div class="sidebar-content">
+        <!-- TAB 1: SCENES -->
+        <div class="tab-pane active" id="tab-scenes">
+          <div class="category-pills" id="category-pills"></div>
+          <div class="section-label">
+            <span id="scene-count-label">ฉากทั้งหมด</span>
+            <button class="btn btn-sm" id="btn-random-scene">🎲 สุ่มฉาก</button>
+          </div>
+          <div class="scenes-grid" id="scenes-grid"></div>
+        </div>
+
+        <!-- TAB 2: CUSTOMIZE -->
+        <div class="tab-pane" id="tab-customize">
+          <div class="control-group">
+            <div class="control-group-title">
+              <span>🖼️ แหล่งภาพพื้นหลัง (Background Source)</span>
+            </div>
+            <div class="field-row">
+              <div class="two-col">
+                <button class="btn btn-sm" id="btn-mode-procedural">✨ ใช้ฉากอนิเมชัน</button>
+                <label class="btn btn-sm btn-cyan" style="cursor:pointer;">
+                  📁 อัปโหลดรูป
+                  <input type="file" id="file-bg-upload" accept="image/*" hidden />
+                </label>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-label"><span>หรือวางลิงก์รูปภาพ (Image URL)</span></div>
+              <div style="display:flex; gap:6px;">
+                <input type="url" id="input-bg-url" placeholder="https://..." />
+                <button class="btn btn-sm" id="btn-apply-url">ใช้รูป</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="control-group-title">
+              <span>🎨 สีประจำฉาก (Custom Palette)</span>
+              <button class="btn btn-sm" id="btn-reset-colors">รีเซ็ตสี</button>
+            </div>
+            <div class="color-row">
+              <label class="color-box">
+                <span>สีหลัก (บน)</span>
+                <div class="color-picker-wrap">
+                  <input type="color" id="col-primary" />
+                  <span class="hex-mini" id="hex-primary">#000000</span>
+                </div>
+              </label>
+              <label class="color-box">
+                <span>สีรอง (ล่าง)</span>
+                <div class="color-picker-wrap">
+                  <input type="color" id="col-secondary" />
+                  <span class="hex-mini" id="hex-secondary">#000000</span>
+                </div>
+              </label>
+              <label class="color-box">
+                <span>สีแสง/เอฟเฟกต์</span>
+                <div class="color-picker-wrap">
+                  <input type="color" id="col-accent" />
+                  <span class="hex-mini" id="hex-accent">#000000</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="control-group-title"><span>✨ แสง ฟิลเตอร์ และเอฟเฟกต์</span></div>
+            <div class="field-row">
+              <div class="field-label"><span>ความสว่าง (Brightness)</span><span class="field-val" id="val-brightness">100%</span></div>
+              <input type="range" id="rng-brightness" min="30" max="170" value="100" />
+            </div>
+            <div class="field-row">
+              <div class="field-label"><span>ความอิ่มสี (Saturation)</span><span class="field-val" id="val-saturate">105%</span></div>
+              <input type="range" id="rng-saturate" min="0" max="200" value="105" />
+            </div>
+            <div class="field-row">
+              <div class="field-label"><span>เบลอฉากหลัง (Blur - ให้ตัวเกมเด่น)</span><span class="field-val" id="val-blur">0 px</span></div>
+              <input type="range" id="rng-blur" min="0" max="25" value="0" />
+            </div>
+            <div class="field-row">
+              <div class="field-label"><span>ฟิลเตอร์มืดทับ (Dim Overlay)</span><span class="field-val" id="val-dim">15%</span></div>
+              <input type="range" id="rng-dim" min="0" max="85" value="15" />
+            </div>
+            <div class="field-row">
+              <div class="field-label"><span>ขอบมืด (Vignette)</span><span class="field-val" id="val-vignette">45%</span></div>
+              <input type="range" id="rng-vignette" min="0" max="100" value="45" />
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="control-group-title"><span>⚡ การเคลื่อนไหวและอนุภาค</span></div>
+            <div class="field-row">
+              <div class="field-label"><span>รูปแบบอนุภาคเสริม</span></div>
+              <select id="sel-particle">
+                <option value="auto">อัตโนมัติตามหมวดหมู่</option>
+                <option value="lanterns">โคมลอย / ดวงไฟลอยขึ้น</option>
+                <option value="sparkles">ประกายทองระยิบระยับ</option>
+                <option value="laser">ลำแสงเวที / นีออน</option>
+                <option value="bass">คลื่นเบส / จังหวะดนตรี</option>
+                <option value="leaves">ใบไม้ / กลีบดอกไม้ปลิว</option>
+                <option value="bokeh">โบเก้ฟุ้งละมุน</option>
+                <option value="none">ปิดอนุภาค</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <div class="field-label"><span>ความเร็วแอนิเมชัน</span><span class="field-val" id="val-speed">1.0x</span></div>
+              <input type="range" id="rng-speed" min="0" max="30" value="10" />
+            </div>
+            <div class="field-row">
+              <div class="field-label"><span>ปริมาณอนุภาค</span><span class="field-val" id="val-density">60%</span></div>
+              <input type="range" id="rng-density" min="0" max="100" value="60" />
+            </div>
+            <div class="toggle-row">
+              <span>จังหวะเต้นตามเบส (Beat Pulse)</span>
+              <label class="switch">
+                <input type="checkbox" id="chk-pulse" />
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: OVERLAY & RESOLUTION & SAVE -->
+        <div class="tab-pane" id="tab-overlay">
+          <div class="control-group">
+            <div class="control-group-title"><span>📝 ข้อความบนฉาก (Game / Live Title)</span></div>
+            <div class="toggle-row" style="margin-bottom:8px;">
+              <span>แสดงข้อความบนฉาก</span>
+              <label class="switch">
+                <input type="checkbox" id="chk-show-text" />
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+            <div class="field-row">
+              <div class="field-label"><span>หัวข้อหลัก (Title)</span></div>
+              <input type="text" id="txt-title" value="เกมสนุก TikTok LIVE" />
+            </div>
+            <div class="field-row">
+              <div class="field-label"><span>ข้อความรอง (Subtitle / CTA)</span></div>
+              <input type="text" id="txt-sub" value="กดหัวใจ หรือส่งของขวัญเพื่อร่วมสนุก!" />
+            </div>
+            <div class="two-col">
+              <div class="field-row">
+                <div class="field-label"><span>ตำแหน่ง</span></div>
+                <select id="sel-text-pos">
+                  <option value="top">ด้านบน (Top)</option>
+                  <option value="center">ตรงกลาง (Center)</option>
+                  <option value="bottom">ด้านล่าง (Bottom)</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <div class="field-label"><span>ขนาดตัวอักษร</span><span class="field-val" id="val-fontsize">64 px</span></div>
+                <input type="range" id="rng-fontsize" min="28" max="120" value="64" />
+              </div>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="control-group-title"><span>📐 ขนาดฉาก & Safe Zone</span></div>
+            <div class="field-row">
+              <div class="field-label"><span>ขนาดมาตรฐาน / กำหนดเอง</span></div>
+              <select id="sel-resolution">
+                <option value="1080x1920">TikTok LIVE 9:16 Full HD (1080 × 1920)</option>
+                <option value="720x1280">TikTok LIVE 9:16 HD (720 × 1280)</option>
+                <option value="1080x1080">สี่เหลี่ยมจัตุรัส 1:1 (1080 × 1080)</option>
+                <option value="1920x1080">แนวนอน 16:9 Full HD (1920 × 1080)</option>
+                <option value="custom">กำหนดขนาดเอง (Custom)</option>
+              </select>
+            </div>
+            <div class="two-col" id="custom-res-box" style="display:none; margin-top:8px;">
+              <div class="field-row">
+                <div class="field-label"><span>กว้าง (px)</span></div>
+                <input type="number" id="num-width" min="320" max="3840" value="1080" />
+              </div>
+              <div class="field-row">
+                <div class="field-label"><span>สูง (px)</span></div>
+                <input type="number" id="num-height" min="320" max="3840" value="1920" />
+              </div>
+            </div>
+            <div class="toggle-row" style="margin-top:8px;">
+              <span>แสดงเส้น Safe Zone ของ TikTok LIVE</span>
+              <label class="switch">
+                <input type="checkbox" id="chk-safezone" />
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="control-group-title"><span>💾 บันทึก & ส่งออกการตั้งค่า</span></div>
+            <div class="field-row" style="display:flex; gap:6px;">
+              <input type="text" id="txt-preset-name" placeholder="ตั้งชื่อพรีเซ็ตของคุณ..." />
+              <button class="btn btn-primary" id="btn-save-preset">บันทึก</button>
+            </div>
+            <div id="saved-presets-list" style="margin-top:10px;"></div>
+            <div class="two-col" style="margin-top:10px;">
+              <button class="btn btn-sm" id="btn-export-json">📤 Export JSON</button>
+              <label class="btn btn-sm" style="cursor:pointer;">
+                📥 Import JSON
+                <input type="file" id="file-import-json" accept=".json" hidden />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: KEYWORDS & STOCK SEARCH -->
+        <div class="tab-pane" id="tab-keywords">
+          <div class="control-group" style="background: rgba(0, 242, 234, 0.08); border-color: rgba(0, 242, 234, 0.25);">
+            <div style="font-size:12px; line-height:1.5;">
+              💡 กด <strong>คัดลอก</strong> หรือกดลิงก์ <strong>Pixabay / Pexels / Unsplash</strong> เพื่อค้นหาภาพจริงลิขสิทธิ์ฟรี (CC0) แล้วนำมาอัปโหลดหรือวางลิงก์ในแท็บ <strong>ตั้งค่าสี/แสง</strong> ได้ทันที
+            </div>
+          </div>
+          <div id="keywords-container"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==================== STAGE PREVIEW ==================== -->
+    <main class="stage-area" id="stage-area">
+      <div class="stage-toolbar hover-reveal">
+        <div class="toolbar-pill">
+          <span id="status-scene-name" style="font-weight:600;">กำลังโหลด...</span>
+          <span style="color:var(--text-muted);">•</span>
+          <span id="status-res" style="color:var(--accent-2); font-weight:600;">1080×1920</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-cyan btn-sm" id="btn-download-png">📸 ดาวน์โหลดภาพ PNG</button>
+          <button class="btn btn-sm" id="btn-exit-live" style="display:none;">✕ ออกจากโหมดไลฟ์ (ESC)</button>
+        </div>
+      </div>
+
+      <div class="stage-frame-wrap" id="stage-frame-wrap">
+        <div class="stage-viewport" id="stage-viewport">
+          <canvas id="bg-canvas"></canvas>
+          <img id="custom-bg-img" alt="Custom Background" />
+          <canvas id="fx-canvas"></canvas>
+          <div class="stage-vignette" id="stage-vignette"></div>
+
+          <div class="stage-text-overlay pos-top" id="stage-text-overlay" style="display:none;">
+            <div class="overlay-title" id="overlay-title-render">เกมสนุก TikTok LIVE</div>
+            <div class="overlay-sub" id="overlay-sub-render">กดหัวใจ หรือส่งของขวัญเพื่อร่วมสนุก!</div>
+          </div>
+
+          <div class="safe-zone-guide" id="safe-zone-guide">
+            <div class="sz-top">พื้นที่โปรไฟล์โฮสต์ / ผู้ชม (Top Safe Zone)</div>
+            <div class="sz-right">ปุ่มแชร์ / ของขวัญ</div>
+            <div class="sz-bottom">พื้นที่คอมเมนต์แชท & ปุ่มส่งของขวัญ TikTok LIVE</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">บันทึกเรียบร้อย</div>
+
+  <script>
+    // ==================== 8 CATEGORIES & 52 PRESET SCENES ====================
+    const CATEGORIES = [
+      { id: 'all', name: 'ทั้งหมด', icon: '✨' },
+      { id: 'loy-krathong', name: 'ลอยกระทง', icon: '🏮' },
+      { id: 'temple', name: 'วัด/พระพุทธรูป', icon: '🛕' },
+      { id: 'culture', name: 'ประเพณีไทย', icon: '🎭' },
+      { id: 'concert', name: 'คอนเสิร์ต/ดนตรี', icon: '🎸' },
+      { id: 'car-audio', name: 'เครื่องเสียงรถ', icon: '🔊' },
+      { id: 'nature', name: 'ธรรมชาติ', icon: '🌿' },
+      { id: 'school', name: 'โรงเรียน', icon: '🏫' },
+      { id: 'hospital', name: 'โรงพยาบาล', icon: '🏥' }
+    ];
+
+    const SCENES = [
+      // 1. ลอยกระทง (7)
+      { id: 'lk-1', cat: 'loy-krathong', name: 'ยี่เป็งโคมลอยนับพัน', sub: 'ฟ้าน้ำเงินเข้ม โคมทองลอยเต็มฟ้า', primary: '#070b24', secondary: '#1a1438', accent: '#ffb703', particle: 'lanterns', style: 'krathong' },
+      { id: 'lk-2', cat: 'loy-krathong', name: 'แม่น้ำกระทงแสงเทียน', sub: 'ผิวน้ำสะท้อนแสงเทียนอบอุ่น', primary: '#08152b', secondary: '#050c1a', accent: '#ffd166', particle: 'lanterns', style: 'krathong' },
+      { id: 'lk-3', cat: 'loy-krathong', name: 'คืนเพ็ญเดือนสิบสอง', sub: 'จันทร์เต็มดวงสีทองอร่าม', primary: '#0c1638', secondary: '#1c2541', accent: '#ffe082', particle: 'sparkles', style: 'krathong' },
+      { id: 'lk-4', cat: 'loy-krathong', name: 'บัวชมพูริมสายน้ำ', sub: 'โทนชมพู-ม่วง โรแมนติก', primary: '#1e0b2e', secondary: '#0f1636', accent: '#ff7eb6', particle: 'lanterns', style: 'krathong' },
+      { id: 'lk-5', cat: 'loy-krathong', name: 'งานวัดริมน้ำโบราณ', sub: 'ไฟราวสลับสีริมท่าน้ำ', primary: '#141229', secondary: '#0b1c2c', accent: '#ff9f1c', particle: 'bokeh', style: 'krathong' },
+      { id: 'lk-6', cat: 'loy-krathong', name: 'โคมล้านนามรกต', sub: 'โทนเขียวมรกต-ทองหรูหรา', primary: '#041f1e', secondary: '#081221', accent: '#2ec4b6', particle: 'lanterns', style: 'krathong' },
+      { id: 'lk-7', cat: 'loy-krathong', name: 'อธิษฐานกลางสายชล', sub: 'แสงดาวระยิบและระลอกน้ำ', primary: '#030816', secondary: '#0c2340', accent: '#ffd86b', particle: 'sparkles', style: 'krathong' },
+
+      // 2. วัด / พระพุทธรูป (6)
+      { id: 'tp-1', cat: 'temple', name: 'วิหารทองยามอัสดง', sub: 'รัศมีสีทอง สงบ สง่างาม', primary: '#2b1306', secondary: '#120804', accent: '#ffd166', particle: 'sparkles', style: 'temple' },
+      { id: 'tp-2', cat: 'temple', name: 'พระพุทธรูปเรืองรอง', sub: 'แสงธรรมสว่างไสวกลางฉาก', primary: '#1f1203', secondary: '#0c0702', accent: '#ffbe0b', particle: 'sparkles', style: 'temple' },
+      { id: 'tp-3', cat: 'temple', name: 'อยุธยาโบราณสถาน', sub: 'เจดีย์เก่าแก่ยามอาทิตย์ตก', primary: '#3d1c10', secondary: '#190c0a', accent: '#f4a261', particle: 'bokeh', style: 'temple' },
+      { id: 'tp-4', cat: 'temple', name: 'หมอกเช้าหน้าอุโบสถ', sub: 'โทนฟ้าทองยามรุ่งอรุณ', primary: '#14213d', secondary: '#2b2d42', accent: '#fca311', particle: 'sparkles', style: 'temple' },
+      { id: 'tp-5', cat: 'temple', name: 'เทียนพรรษาแสงศรัทธา', sub: 'อบอุ่นด้วยเปลวเทียนสีอำพัน', primary: '#1a0c05', secondary: '#0a0402', accent: '#ff9e00', particle: 'lanterns', style: 'temple' },
+      { id: 'tp-6', cat: 'temple', name: 'เจดีย์ขาวดอยสูง', sub: 'โทนขาว-ทอง สะอาดตา', primary: '#1b263b', secondary: '#415a77', accent: '#ffd700', particle: 'bokeh', style: 'temple' },
+
+      // 3. ประเพณีไทย (6)
+      { id: 'cu-1', cat: 'culture', name: 'สงกรานต์สาดน้ำสดใส', sub: 'ฟ้าใส ละอองน้ำชุ่มฉ่ำ', primary: '#0077b6', secondary: '#023e8a', accent: '#90e0ef', particle: 'bokeh', style: 'culture' },
+      { id: 'cu-2', cat: 'culture', name: 'ลายกนกทองมงคล', sub: 'แดงชาดตัดลายทองไทย', primary: '#4a0404', secondary: '#1f0202', accent: '#ffd166', particle: 'sparkles', style: 'culture' },
+      { id: 'cu-3', cat: 'culture', name: 'งานวัดไฟราวหรรษา', sub: 'สีสันสดใสบรรยากาศรื่นเริง', primary: '#240046', secondary: '#10002b', accent: '#ff9e00', particle: 'bokeh', style: 'culture' },
+      { id: 'cu-4', cat: 'culture', name: 'ผ้าไหมไทยสีคราม', sub: 'ครามเข้มหรูหราแบบร่วมสมัย', primary: '#0b1d51', secondary: '#060d26', accent: '#f7b801', particle: 'sparkles', style: 'culture' },
+      { id: 'cu-5', cat: 'culture', name: 'ขบวนแห่กลองยาว', sub: 'ส้มทองพลังแห่งความสนุก', primary: '#3d0c02', secondary: '#1c0502', accent: '#ff5400', particle: 'sparkles', style: 'culture' },
+      { id: 'cu-6', cat: 'culture', name: 'ตลาดน้ำยามเช้า', sub: 'เขียวมรกต-เหลืองแดดอ่อน', primary: '#083d3b', secondary: '#0b2027', accent: '#f4d35e', particle: 'leaves', style: 'culture' },
+
+      // 4. คอนเสิร์ต / ดนตรี (7)
+      { id: 'co-1', cat: 'concert', name: 'เวทีเลเซอร์นีออน', sub: 'ลำแสงเลเซอร์ชมพู-ฟ้าไซเบอร์', primary: '#090014', secondary: '#14002b', accent: '#ff007f', particle: 'laser', style: 'concert' },
+      { id: 'co-2', cat: 'concert', name: 'หมอลำซิ่งไฟระยิบ', sub: 'ม่วง-ทอง สปอตไลต์จัดเต็ม', primary: '#2b023b', secondary: '#0c0117', accent: '#00f5d4', particle: 'laser', style: 'concert' },
+      { id: 'co-3', cat: 'concert', name: 'ร็อกสเตจไฟลุก', sub: 'แดง-ส้ม ดุดันเร้าใจ', primary: '#240000', secondary: '#0a0000', accent: '#ff3b30', particle: 'sparkles', style: 'concert' },
+      { id: 'co-4', cat: 'concert', name: 'EDM Festival กลางคืน', sub: 'ฟ้าน้ำเงิน-ไซอัน อีควอไลเซอร์', primary: '#020b1f', secondary: '#041c42', accent: '#00f2ea', particle: 'laser', style: 'concert' },
+      { id: 'co-5', cat: 'concert', name: 'อะคูสติกอบอุ่น', sub: 'ไฟวอร์มไวท์สไตล์คาเฟ่', primary: '#1c120c', secondary: '#0d0805', accent: '#ffb703', particle: 'bokeh', style: 'concert' },
+      { id: 'co-6', cat: 'concert', name: 'ลูกทุ่งเวทีทอง', sub: 'ทองอร่ามไฟฟลัดไลต์', primary: '#1e1600', secondary: '#0d0900', accent: '#ffd60a', particle: 'sparkles', style: 'concert' },
+      { id: 'co-7', cat: 'concert', name: 'K-Pop Stage Pastel', sub: 'ม่วงพาสเทล-ชมพูนีออน', primary: '#1f0c36', secondary: '#120824', accent: '#ff70a6', particle: 'laser', style: 'concert' },
+
+      // 5. เครื่องเสียงรถ / รถแต่ง (6)
+      { id: 'ca-1', cat: 'car-audio', name: 'ตู้ซับวูฟเฟอร์นีออน', sub: 'ลำโพงคู่กลาง-ล่าง สั่นตามเบส', primary: '#050814', secondary: '#0b1026', accent: '#00e5ff', particle: 'bass', style: 'caraudio' },
+      { id: 'ca-2', cat: 'car-audio', name: 'กระบะเครื่องเสียง RGB', sub: 'ไฟ LED ม่วง-ชมพูสุดจัด', primary: '#120424', secondary: '#070212', accent: '#ff2a85', particle: 'bass', style: 'caraudio' },
+      { id: 'ca-3', cat: 'car-audio', name: 'เบสหนักสายแข่ง SPL', sub: 'แดง-ดำ ดุดันทรงพลัง', primary: '#1a0305', secondary: '#080102', accent: '#ff1e42', particle: 'bass', style: 'caraudio' },
+      { id: 'ca-4', cat: 'car-audio', name: 'โชว์เครื่องเสียงกลางคืน', sub: 'เขียวมะนาว-ดำ สไตล์รถซิ่ง', primary: '#04140a', secondary: '#020804', accent: '#39ff14', particle: 'bass', style: 'caraudio' },
+      { id: 'ca-5', cat: 'car-audio', name: 'สเปกตรัมเสียงทองคำ', sub: 'หรูหราสไตล์ VIP Car Audio', primary: '#12100a', secondary: '#080704', accent: '#ffc300', particle: 'bass', style: 'caraudio' },
+      { id: 'ca-6', cat: 'car-audio', name: 'ไซเบอร์ซับวูฟเฟอร์', sub: 'น้ำเงินไฟฟ้า-ส้มนีออน', primary: '#040b1a', secondary: '#091533', accent: '#ff7b00', particle: 'laser', style: 'caraudio' },
+
+      // 6. ธรรมชาติ (7)
+      { id: 'na-1', cat: 'nature', name: 'น้ำตกป่าเขียวแสงเช้า', sub: 'สดชื่น สบายตา ละอองน้ำ', primary: '#0b2b26', secondary: '#051714', accent: '#52b788', particle: 'leaves', style: 'nature' },
+      { id: 'na-2', cat: 'nature', name: 'ภูเขายามพระอาทิตย์ตก', sub: 'ทิวเขาซ้อนกันสีส้มม่วง', primary: '#2d142c', secondary: '#510a32', accent: '#ff8c42', particle: 'bokeh', style: 'nature' },
+      { id: 'na-3', cat: 'nature', name: 'ทะเลสาบสงบเงาสะท้อน', sub: 'ฟ้าน้ำเงินอมเขียว ผ่อนคลาย', primary: '#0a2239', secondary: '#1d4e89', accent: '#7bdff2', particle: 'bokeh', style: 'nature' },
+      { id: 'na-4', cat: 'nature', name: 'ป่าหิ่งห้อยยามค่ำคืน', sub: 'แสงหิ่งห้อยสีเขียวทอง', primary: '#04120c', secondary: '#082418', accent: '#b5e48c', particle: 'sparkles', style: 'nature' },
+      { id: 'na-5', cat: 'nature', name: 'ซากุระและสายลม', sub: 'กลีบดอกไม้สีชมพูปลิวไสว', primary: '#1e162e', secondary: '#34244d', accent: '#ffb3c6', particle: 'leaves', style: 'nature' },
+      { id: 'na-6', cat: 'nature', name: 'ทะเลดาวทางช้างเผือก', sub: 'ท้องฟ้ายามค่ำคืนเหนือยอดเขา', primary: '#03071e', secondary: '#101942', accent: '#90e0ef', particle: 'sparkles', style: 'nature' },
+      { id: 'na-7', cat: 'nature', name: 'ทุ่งหญ้าแสงแดดอุ่น', sub: 'เขียวทองสดใส พลังบวก', primary: '#1b4332', secondary: '#2d6a4f', accent: '#ffd166', particle: 'leaves', style: 'nature' },
+
+      // 7. โรงเรียน (6)
+      { id: 'sc-1', cat: 'school', name: 'ห้องเรียนแสงแดดเช้า', sub: 'อบอุ่น สดใส สไตล์อนิเมะ/เกม', primary: '#1d3557', secondary: '#457b9d', accent: '#ffd166', particle: 'bokeh', style: 'school' },
+      { id: 'sc-2', cat: 'school', name: 'กระดานดำห้องเรียน', sub: 'เขียวเข้มกระดานดำคลาสสิก', primary: '#0f2e1f', secondary: '#081c12', accent: '#f4f1de', particle: 'sparkles', style: 'school' },
+      { id: 'sc-3', cat: 'school', name: 'โถงทางเดินโรงเรียน', sub: 'แสงลอดหน้าต่างยามเย็น', primary: '#3d2c2e', secondary: '#1f171a', accent: '#ff9f1c', particle: 'bokeh', style: 'school' },
+      { id: 'sc-4', cat: 'school', name: 'ห้องสมุดแสนสงบ', sub: 'โทนไม้อบอุ่น-ไฟโคมอ่านหนังสือ', primary: '#2b1d12', secondary: '#140d08', accent: '#e9c46a', particle: 'sparkles', style: 'school' },
+      { id: 'sc-5', cat: 'school', name: 'สนามกีฬาโรงเรียน', sub: 'ฟ้าสดใส-เขียวสนามหญ้า', primary: '#0077b6', secondary: '#1b4332', accent: '#ffffff', particle: 'leaves', style: 'school' },
+      { id: 'sc-6', cat: 'school', name: 'วันรับปริญญาสีทอง', sub: 'หรูหรา ฉลองความสำเร็จ', primary: '#141b33', secondary: '#090d1a', accent: '#ffd700', particle: 'sparkles', style: 'school' },
+
+      // 8. โรงพยาบาล (7)
+      { id: 'ho-1', cat: 'hospital', name: 'โถงโรงพยาบาลโมเดิร์น', sub: 'สะอาดตา ขาว-ฟ้า สบายใจ', primary: '#0f3057', secondary: '#00587a', accent: '#a8e6cf', particle: 'bokeh', style: 'hospital' },
+      { id: 'ho-2', cat: 'hospital', name: 'คลินิกมินิมอลอบอุ่น', sub: 'เขียวมินต์นุ่มนวล ทันสมัย', primary: '#0b3b36', secondary: '#145c54', accent: '#80ffdb', particle: 'bokeh', style: 'hospital' },
+      { id: 'ho-3', cat: 'hospital', name: 'ห้องแล็บไฮเทค', sub: 'ไซเบอร์เมดิคอล ฟ้าเรืองแสง', primary: '#031926', secondary: '#072f47', accent: '#00f2ea', particle: 'sparkles', style: 'hospital' },
+      { id: 'ho-4', cat: 'hospital', name: 'แผนกฉุกเฉิน ER', sub: 'น้ำเงิน-แดง สัญญาณชีพ', primary: '#0b132b', secondary: '#1c2541', accent: '#ff4d6d', particle: 'laser', style: 'hospital' },
+      { id: 'ho-5', cat: 'hospital', name: 'สวนพักฟื้นสีเขียว', sub: 'ธรรมชาติบำบัด ผ่อนคลาย', primary: '#1b4332', secondary: '#081c15', accent: '#95d5b2', particle: 'leaves', style: 'hospital' },
+      { id: 'ho-6', cat: 'hospital', name: 'เคาน์เตอร์ต้อนรับ VIP', sub: 'ขาวมุก-ทองอ่อน สะอาดหรู', primary: '#223347', secondary: '#121d2b', accent: '#e0fbfc', particle: 'bokeh', style: 'hospital' },
+      { id: 'ho-7', cat: 'hospital', name: 'คลื่นหัวใจ Medical HUD', sub: 'กราฟชีพจร ECG เคลื่อนไหว', primary: '#04121c', secondary: '#082030', accent: '#06d6a0', particle: 'sparkles', style: 'hospital' }
+    ];
+
+    const KEYWORD_GROUPS = [
+      {
+        title: '1. หมวดลอยกระทง (Loy Krathong)',
+        keywords: ['Loy Krathong festival background', 'Thai floating lantern festival', 'Yi Peng lantern night sky', 'river with krathong candle light']
+      },
+      {
+        title: '2. หมวดวัด / พระพุทธรูป (Temple & Buddha)',
+        keywords: ['Thai temple architecture background', 'Golden Buddha statue Thailand', 'Buddhist temple interior sunset', 'Ayutthaya ancient temple ruins']
+      },
+      {
+        title: '3. หมวดประเพณีไทย (Thai Tradition & Culture)',
+        keywords: ['Thai traditional dance background', 'Thai cultural festival parade', 'Songkran festival Thailand water', 'Thai ancient heritage']
+      },
+      {
+        title: '4. หมวดคอนเสิร์ต / ดนตรี (Concert & Music)',
+        keywords: ['live music concert stage lights background', 'DJ stage laser light show', 'rock concert crowd and stage', 'music festival night background']
+      },
+      {
+        title: '5. หมวดเครื่องเสียงรถ / รถแต่ง (Car Audio)',
+        keywords: ['modified car sound system trunk', 'car audio bass speaker installation', 'pickup truck with massive speakers', 'neon car audio setup']
+      },
+      {
+        title: '6. หมวดธรรมชาติ (Nature Landscapes)',
+        keywords: ['lush green nature landscape background', 'tropical forest waterfall sunrise', 'sunset mountain view HD', 'serene lake and trees']
+      },
+      {
+        title: '7. หมวดโรงเรียน (School & Classroom)',
+        keywords: ['modern school classroom interior background', 'empty school hallway corridor', 'school playground green grass', 'university campus library']
+      },
+      {
+        title: '8. หมวดโรงพยาบาล (Hospital & Clinic)',
+        keywords: ['modern hospital corridor interior', 'clean hospital reception waiting area', 'medical clinic background blur', 'healthcare laboratory']
+      }
+    ];
+
+    // ==================== STATE ====================
+    const state = {
+      activeCat: 'all',
+      sceneId: 'lk-1',
+      sourceMode: 'procedural', // 'procedural' | 'image'
+      customImageUrl: '',
+      primary: '#070b24',
+      secondary: '#1a1438',
+      accent: '#ffb703',
+      brightness: 100,
+      saturate: 105,
+      blur: 0,
+      dim: 15,
+      vignette: 45,
+      particle: 'auto',
+      speed: 1.0,
+      density: 60,
+      pulse: false,
+      showText: false,
+      title: 'เกมสนุก TikTok LIVE',
+      subtitle: 'กดหัวใจ หรือส่งของขวัญเพื่อร่วมสนุก!',
+      textPos: 'top',
+      fontSize: 64,
+      width: 1080,
+      height: 1920,
+      safeZone: false
+    };
+
+    // ==================== DOM REFS ====================
+    const el = {
+      appShell: document.getElementById('app-shell'),
+      categoryPills: document.getElementById('category-pills'),
+      scenesGrid: document.getElementById('scenes-grid'),
+      sceneCountLabel: document.getElementById('scene-count-label'),
+      stageFrameWrap: document.getElementById('stage-frame-wrap'),
+      stageViewport: document.getElementById('stage-viewport'),
+      bgCanvas: document.getElementById('bg-canvas'),
+      fxCanvas: document.getElementById('fx-canvas'),
+      customBgImg: document.getElementById('custom-bg-img'),
+      vignette: document.getElementById('stage-vignette'),
+      textOverlay: document.getElementById('stage-text-overlay'),
+      titleRender: document.getElementById('overlay-title-render'),
+      subRender: document.getElementById('overlay-sub-render'),
+      safeZoneGuide: document.getElementById('safe-zone-guide'),
+      statusSceneName: document.getElementById('status-scene-name'),
+      statusRes: document.getElementById('status-res'),
+      toast: document.getElementById('toast')
+    };
+
+    const bgCtx = el.bgCanvas.getContext('2d');
+    const fxCtx = el.fxCanvas.getContext('2d');
+
+    function showToast(msg) {
+      el.toast.textContent = msg;
+      el.toast.classList.add('show');
+      clearTimeout(el.toast._t);
+      el.toast._t = setTimeout(() => el.toast.classList.remove('show'), 2200);
+    }
+
+    function hexToRgb(hex) {
+      const clean = hex.replace('#', '');
+      const num = parseInt(clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean, 16);
+      return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+    }
+
+    function rgba(hex, a) {
+      const { r, g, b } = hexToRgb(hex);
+      return `rgba(${r},${g},${b},${a})`;
+    }
+
+    // ==================== RENDER UI LISTS ====================
+    function renderCategories() {
+      el.categoryPills.innerHTML = CATEGORIES.map(c => `
+        <button class="cat-pill ${state.activeCat === c.id ? 'active' : ''}" data-cat="${c.id}">
+          <span>${c.icon}</span><span>${c.name}</span>
+        </button>
+      `).join('');
+
+      el.categoryPills.querySelectorAll('.cat-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.activeCat = btn.dataset.cat;
+          renderCategories();
+          renderScenes();
+        });
+      });
+    }
+
+    function renderScenes() {
+      const list = state.activeCat === 'all' ? SCENES : SCENES.filter(s => s.cat === state.activeCat);
+      el.sceneCountLabel.textContent = `ฉากพร้อมใช้ (${list.length} แบบ)`;
+
+      el.scenesGrid.innerHTML = list.map(s => {
+        const catObj = CATEGORIES.find(c => c.id === s.cat);
+        return `
+          <div class="scene-card ${state.sceneId === s.id && state.sourceMode === 'procedural' ? 'active' : ''}" data-id="${s.id}">
+            <div class="scene-thumb" style="background: linear-gradient(160deg, ${s.primary} 0%, ${s.secondary} 65%, ${s.accent} 140%);">
+              <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 40%, ${rgba(s.accent, 0.35)}, transparent 65%);"></div>
+              <span class="scene-thumb-badge">${catObj ? catObj.icon + ' ' + catObj.name : ''}</span>
+            </div>
+            <div class="scene-meta">
+              <div class="scene-name">${s.name}</div>
+              <div class="scene-sub">${s.sub}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      el.scenesGrid.querySelectorAll('.scene-card').forEach(card => {
+        card.addEventListener('click', () => selectScene(card.dataset.id));
+      });
+    }
+
+    function selectScene(id) {
+      const scene = SCENES.find(s => s.id === id);
+      if (!scene) return;
+      state.sceneId = id;
+      state.sourceMode = 'procedural';
+      state.primary = scene.primary;
+      state.secondary = scene.secondary;
+      state.accent = scene.accent;
+      syncInputsFromState();
+      renderScenes();
+      applyVisualSettings();
+      initParticles();
+    }
+
+    function renderKeywords() {
+      const container = document.getElementById('keywords-container');
+      container.innerHTML = KEYWORD_GROUPS.map(g => `
+        <div class="kw-card">
+          <div class="kw-title"><span>${g.title}</span></div>
+          <div class="kw-list">
+            ${g.keywords.map(kw => {
+              const q = encodeURIComponent(kw);
+              return `
+                <div class="kw-item">
+                  <span class="kw-text" title="${kw}">${kw}</span>
+                  <div class="kw-actions">
+                    <button class="btn btn-sm" style="padding:3px 6px;font-size:10.5px;" onclick="copyKeyword('${kw.replace(/'/g, "\\'")}')">คัดลอก</button>
+                    <a class="kw-link" href="https://pixabay.com/images/search/${q}/" target="_blank" rel="noopener">Pixabay</a>
+                    <a class="kw-link" href="https://www.pexels.com/search/${q}/" target="_blank" rel="noopener">Pexels</a>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.copyKeyword = function(kw) {
+      navigator.clipboard?.writeText(kw);
+      showToast(`คัดลอกคำค้นหา: "${kw}"`);
+    };
+
+    // ==================== SYNC INPUTS & VISUALS ====================
+    function syncInputsFromState() {
+      document.getElementById('col-primary').value = state.primary;
+      document.getElementById('hex-primary').textContent = state.primary.toUpperCase();
+      document.getElementById('col-secondary').value = state.secondary;
+      document.getElementById('hex-secondary').textContent = state.secondary.toUpperCase();
+      document.getElementById('col-accent').value = state.accent;
+      document.getElementById('hex-accent').textContent = state.accent.toUpperCase();
+
+      document.getElementById('rng-brightness').value = state.brightness;
+      document.getElementById('val-brightness').textContent = state.brightness + '%';
+      document.getElementById('rng-saturate').value = state.saturate;
+      document.getElementById('val-saturate').textContent = state.saturate + '%';
+      document.getElementById('rng-blur').value = state.blur;
+      document.getElementById('val-blur').textContent = state.blur + ' px';
+      document.getElementById('rng-dim').value = state.dim;
+      document.getElementById('val-dim').textContent = state.dim + '%';
+      document.getElementById('rng-vignette').value = state.vignette;
+      document.getElementById('val-vignette').textContent = state.vignette + '%';
+
+      document.getElementById('sel-particle').value = state.particle;
+      document.getElementById('rng-speed').value = Math.round(state.speed * 10);
+      document.getElementById('val-speed').textContent = state.speed.toFixed(1) + 'x';
+      document.getElementById('rng-density').value = state.density;
+      document.getElementById('val-density').textContent = state.density + '%';
+      document.getElementById('chk-pulse').checked = state.pulse;
+
+      document.getElementById('chk-show-text').checked = state.showText;
+      document.getElementById('txt-title').value = state.title;
+      document.getElementById('txt-sub').value = state.subtitle;
+      document.getElementById('sel-text-pos').value = state.textPos;
+      document.getElementById('rng-fontsize').value = state.fontSize;
+      document.getElementById('val-fontsize').textContent = state.fontSize + ' px';
+
+      document.getElementById('num-width').value = state.width;
+      document.getElementById('num-height').value = state.height;
+      document.getElementById('chk-safezone').checked = state.safeZone;
+    }
+
+    function applyVisualSettings() {
+      const scene = SCENES.find(s => s.id === state.sceneId) || SCENES[0];
+      el.statusSceneName.textContent = state.sourceMode === 'image' ? 'ภาพพื้นหลังกำหนดเอง' : scene.name;
+      el.statusRes.textContent = `${state.width}×${state.height}`;
+
+      if (el.bgCanvas.width !== state.width || el.bgCanvas.height !== state.height) {
+        el.bgCanvas.width = state.width;
+        el.bgCanvas.height = state.height;
+        el.fxCanvas.width = state.width;
+        el.fxCanvas.height = state.height;
+        el.stageViewport.style.width = state.width + 'px';
+        el.stageViewport.style.height = state.height + 'px';
+        fitStageToScreen();
+        initParticles();
+      }
+
+      const filterStr = `brightness(${state.brightness}%) saturate(${state.saturate}%) blur(${state.blur}px)`;
+      el.bgCanvas.style.filter = filterStr;
+      el.customBgImg.style.filter = filterStr;
+
+      if (state.sourceMode === 'image' && state.customImageUrl) {
+        el.customBgImg.src = state.customImageUrl;
+        el.customBgImg.style.display = 'block';
+        el.bgCanvas.style.display = 'none';
+      } else {
+        el.customBgImg.style.display = 'none';
+        el.bgCanvas.style.display = 'block';
+      }
+
+      const vigAlpha = (state.vignette / 100) * 0.85;
+      const dimAlpha = (state.dim / 100) * 0.88;
+      el.vignette.style.background = `
+        linear-gradient(rgba(0,0,0,${dimAlpha}), rgba(0,0,0,${dimAlpha})),
+        radial-gradient(circle at center, transparent 42%, rgba(0,0,0,${vigAlpha}) 100%)
+      `;
+
+      // Text overlay
+      el.textOverlay.style.display = state.showText ? 'block' : 'none';
+      el.textOverlay.className = `stage-text-overlay pos-${state.textPos}`;
+      el.titleRender.textContent = state.title;
+      el.subRender.textContent = state.subtitle;
+      el.titleRender.style.fontSize = state.fontSize + 'px';
+      el.subRender.style.fontSize = Math.max(20, Math.round(state.fontSize * 0.44)) + 'px';
+      el.titleRender.style.color = '#ffffff';
+
+      el.safeZoneGuide.classList.toggle('visible', state.safeZone);
+    }
+
+    function fitStageToScreen() {
+      const rect = el.stageFrameWrap.getBoundingClientRect();
+      const pad = el.appShell.classList.contains('live-mode') ? 0 : 28;
+      const availW = Math.max(100, rect.width - pad);
+      const availH = Math.max(100, rect.height - pad - (el.appShell.classList.contains('live-mode') ? 0 : 36));
+      const scale = Math.min(availW / state.width, availH / state.height);
+      el.stageViewport.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', fitStageToScreen);
+
+    // ==================== PROCEDURAL SCENE & PARTICLE ENGINE ====================
+    let particles = [];
+    let animTime = 0;
+    let lastTs = performance.now();
+
+    function getActiveParticleType() {
+      if (state.particle !== 'auto') return state.particle;
+      const scene = SCENES.find(s => s.id === state.sceneId);
+      return scene ? scene.particle : 'sparkles';
+    }
+
+    function initParticles() {
+      particles = [];
+      const count = Math.round((state.density / 100) * 75);
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * state.width,
+          y: Math.random() * state.height,
+          size: 4 + Math.random() * 18,
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: 0.4 + Math.random() * 1.4,
+          phase: Math.random() * Math.PI * 2,
+          alpha: 0.25 + Math.random() * 0.65
+        });
+      }
+    }
+
+    function drawBackgroundScene(t) {
+      const w = state.width;
+      const h = state.height;
+      const scene = SCENES.find(s => s.id === state.sceneId) || SCENES[0];
+      const pulseFactor = state.pulse ? (1 + Math.sin(t * 7.5) * 0.04) : 1;
+
+      // Base gradient
+      const grad = bgCtx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, state.primary);
+      grad.addColorStop(0.6, state.secondary);
+      grad.addColorStop(1, state.primary);
+      bgCtx.fillStyle = grad;
+      bgCtx.fillRect(0, 0, w, h);
+
+      // Ambient radial glow
+      const glow = bgCtx.createRadialGradient(w * 0.5, h * 0.36, 10, w * 0.5, h * 0.36, w * 0.72 * pulseFactor);
+      glow.addColorStop(0, rgba(state.accent, 0.35));
+      glow.addColorStop(0.55, rgba(state.accent, 0.09));
+      glow.addColorStop(1, 'transparent');
+      bgCtx.fillStyle = glow;
+      bgCtx.fillRect(0, 0, w, h);
+
+      const st = scene.style;
+
+      if (st === 'krathong') {
+        // Moon + Water horizon + Ripples
+        bgCtx.save();
+        bgCtx.fillStyle = rgba(state.accent, 0.85);
+        bgCtx.shadowColor = state.accent;
+        bgCtx.shadowBlur = 60;
+        bgCtx.beginPath();
+        bgCtx.arc(w * 0.72, h * 0.2, w * 0.09, 0, Math.PI * 2);
+        bgCtx.fill();
+        bgCtx.restore();
+
+        // Water area
+        const waterY = h * 0.56;
+        const wGrad = bgCtx.createLinearGradient(0, waterY, 0, h);
+        wGrad.addColorStop(0, rgba(state.secondary, 0.85));
+        wGrad.addColorStop(1, '#020612');
+        bgCtx.fillStyle = wGrad;
+        bgCtx.fillRect(0, waterY, w, h - waterY);
+
+        // Shimmering water lines
+        bgCtx.strokeStyle = rgba(state.accent, 0.25);
+        bgCtx.lineWidth = 2;
+        for (let i = 0; i < 18; i++) {
+          const y = waterY + 30 + i * ((h - waterY) / 18);
+          const len = 80 + Math.sin(t * 1.5 + i) * 60 + i * 12;
+          const x = w * 0.5 - len / 2 + Math.sin(t + i * 0.7) * 40;
+          bgCtx.beginPath();
+          bgCtx.moveTo(x, y);
+          bgCtx.lineTo(x + len, y);
+          bgCtx.stroke();
+        }
+      } else if (st === 'temple') {
+        // Halo rays + Thai temple silhouette
+        bgCtx.save();
+        bgCtx.translate(w * 0.5, h * 0.42);
+        for (let i = 0; i < 16; i++) {
+          bgCtx.rotate((Math.PI * 2) / 16 + t * 0.004);
+          bgCtx.fillStyle = rgba(state.accent, 0.06);
+          bgCtx.beginPath();
+          bgCtx.moveTo(0, 0);
+          bgCtx.lineTo(-40, -h * 0.6);
+          bgCtx.lineTo(40, -h * 0.6);
+          bgCtx.closePath();
+          bgCtx.fill();
+        }
+        bgCtx.restore();
+
+        // Pagoda / Temple silhouette at bottom
+        bgCtx.fillStyle = rgba('#050302', 0.65);
+        bgCtx.beginPath();
+        bgCtx.moveTo(0, h);
+        bgCtx.lineTo(0, h * 0.78);
+        bgCtx.lineTo(w * 0.22, h * 0.78);
+        bgCtx.lineTo(w * 0.35, h * 0.68);
+        bgCtx.lineTo(w * 0.46, h * 0.68);
+        bgCtx.lineTo(w * 0.5, h * 0.48);
+        bgCtx.lineTo(w * 0.54, h * 0.68);
+        bgCtx.lineTo(w * 0.65, h * 0.68);
+        bgCtx.lineTo(w * 0.78, h * 0.78);
+        bgCtx.lineTo(w, h * 0.78);
+        bgCtx.lineTo(w, h);
+        bgCtx.closePath();
+        bgCtx.fill();
+      } else if (st === 'culture') {
+        // Decorative Thai arched frame & festive string lights
+        bgCtx.strokeStyle = rgba(state.accent, 0.22);
+        bgCtx.lineWidth = 4;
+        for (let r = 1; r <= 4; r++) {
+          bgCtx.beginPath();
+          bgCtx.arc(w * 0.5, h * 0.5, w * 0.18 * r + Math.sin(t + r) * 8, 0, Math.PI * 2);
+          bgCtx.stroke();
+        }
+        // String lights at top
+        for (let i = 0; i < 12; i++) {
+          const lx = (w / 11) * i;
+          const ly = 90 + Math.sin((i / 11) * Math.PI) * 70;
+          bgCtx.fillStyle = i % 2 === 0 ? state.accent : '#ffffff';
+          bgCtx.beginPath();
+          bgCtx.arc(lx, ly, 8 + Math.sin(t * 4 + i) * 2, 0, Math.PI * 2);
+          bgCtx.fill();
+        }
+      } else if (st === 'concert') {
+        // Stage spotlights sweeping from top corners
+        for (let i = 0; i < 4; i++) {
+          const angle = Math.sin(t * 1.1 + i * 1.5) * 0.45;
+          const sx = i < 2 ? w * 0.15 : w * 0.85;
+          bgCtx.save();
+          bgCtx.translate(sx, 0);
+          bgCtx.rotate(angle);
+          const beam = bgCtx.createLinearGradient(0, 0, 0, h * 0.9);
+          beam.addColorStop(0, rgba(state.accent, 0.42));
+          beam.addColorStop(1, 'transparent');
+          bgCtx.fillStyle = beam;
+          bgCtx.beginPath();
+          bgCtx.moveTo(-20, 0);
+          bgCtx.lineTo(-220, h * 0.95);
+          bgCtx.lineTo(220, h * 0.95);
+          bgCtx.lineTo(20, 0);
+          bgCtx.closePath();
+          bgCtx.fill();
+          bgCtx.restore();
+        }
+      } else if (st === 'caraudio') {
+        // Twin subwoofer rings + equalizer bars at bottom
+        const subY = h * 0.72;
+        const beat = Math.abs(Math.sin(t * 6)) * 18;
+        [w * 0.28, w * 0.72].forEach(cx => {
+          for (let ring = 3; ring >= 1; ring--) {
+            bgCtx.strokeStyle = rgba(state.accent, 0.18 * (4 - ring));
+            bgCtx.lineWidth = 6;
+            bgCtx.beginPath();
+            bgCtx.arc(cx, subY, ring * 55 + beat, 0, Math.PI * 2);
+            bgCtx.stroke();
+          }
+          bgCtx.fillStyle = '#07090f';
+          bgCtx.beginPath();
+          bgCtx.arc(cx, subY, 115 + beat * 0.4, 0, Math.PI * 2);
+          bgCtx.fill();
+          bgCtx.strokeStyle = state.accent;
+          bgCtx.lineWidth = 5;
+          bgCtx.stroke();
+        });
+
+        // Equalizer bars
+        const bars = 24;
+        const bw = w / bars;
+        for (let i = 0; i < bars; i++) {
+          const bh = 40 + Math.abs(Math.sin(t * 5 + i * 0.6)) * 180;
+          bgCtx.fillStyle = rgba(state.accent, 0.35);
+          bgCtx.fillRect(i * bw + 4, h - bh, bw - 8, bh);
+        }
+      } else if (st === 'nature') {
+        // Layered parallax mountains
+        const layers = [
+          { y: 0.62, amp: 80, alpha: 0.35 },
+          { y: 0.72, amp: 60, alpha: 0.55 },
+          { y: 0.84, amp: 45, alpha: 0.8 }
+        ];
+        layers.forEach((ly, idx) => {
+          bgCtx.fillStyle = rgba(state.secondary, ly.alpha);
+          bgCtx.beginPath();
+          bgCtx.moveTo(0, h);
+          for (let x = 0; x <= w; x += 40) {
+            const y = h * ly.y + Math.sin(x * 0.005 + idx * 2) * ly.amp + Math.cos(x * 0.012 + idx) * 25;
+            bgCtx.lineTo(x, y);
+          }
+          bgCtx.lineTo(w, h);
+          bgCtx.closePath();
+          bgCtx.fill();
+        });
+      } else if (st === 'school') {
+        // Sunlit classroom window beams
+        bgCtx.save();
+        for (let i = 0; i < 3; i++) {
+          bgCtx.fillStyle = rgba(state.accent, 0.09);
+          bgCtx.beginPath();
+          bgCtx.moveTo(w * (0.1 + i * 0.28), 0);
+          bgCtx.lineTo(w * (0.3 + i * 0.28), 0);
+          bgCtx.lineTo(w * (0.55 + i * 0.28), h);
+          bgCtx.lineTo(w * (0.25 + i * 0.28), h);
+          bgCtx.closePath();
+          bgCtx.fill();
+        }
+        bgCtx.restore();
+      } else if (st === 'hospital') {
+        // Clean architectural grid + ECG pulse line
+        bgCtx.strokeStyle = rgba(state.accent, 0.08);
+        bgCtx.lineWidth = 2;
+        for (let x = 0; x < w; x += 120) {
+          bgCtx.beginPath();
+          bgCtx.moveTo(x, 0);
+          bgCtx.lineTo(x, h);
+          bgCtx.stroke();
+        }
+        // Subtle ECG wave across middle
+        bgCtx.strokeStyle = rgba(state.accent, 0.35);
+        bgCtx.lineWidth = 3;
+        bgCtx.beginPath();
+        for (let x = 0; x <= w; x += 12) {
+          const phase = ((x + t * 180) % 320) / 320;
+          let dy = 0;
+          if (phase > 0.42 && phase < 0.46) dy = -55;
+          else if (phase >= 0.46 && phase < 0.5) dy = 35;
+          else if (phase >= 0.5 && phase < 0.54) dy = -18;
+          bgCtx.lineTo(x, h * 0.52 + dy);
+        }
+        bgCtx.stroke();
+      }
+    }
+
+    function drawParticles(t, dt) {
+      const w = state.width;
+      const h = state.height;
+      fxCtx.clearRect(0, 0, w, h);
+
+      const type = getActiveParticleType();
+      if (type === 'none' || state.density === 0) return;
+
+      for (const p of particles) {
+        const sp = state.speed;
+        if (type === 'lanterns') {
+          p.y -= p.vy * 60 * dt * sp;
+          p.x += Math.sin(t + p.phase) * 0.6 * sp;
+          if (p.y < -40) { p.y = h + 40; p.x = Math.random() * w; }
+
+          fxCtx.save();
+          fxCtx.fillStyle = rgba(state.accent, p.alpha);
+          fxCtx.shadowColor = state.accent;
+          fxCtx.shadowBlur = 18;
+          fxCtx.beginPath();
+          fxCtx.roundRect(p.x - p.size * 0.45, p.y - p.size * 0.65, p.size * 0.9, p.size * 1.3, 4);
+          fxCtx.fill();
+          fxCtx.restore();
+        } else if (type === 'sparkles' || type === 'bokeh') {
+          p.y -= p.vy * 25 * dt * sp;
+          p.x += Math.sin(t * 0.8 + p.phase) * 0.4 * sp;
+          if (p.y < -30) { p.y = h + 30; p.x = Math.random() * w; }
+
+          const r = type === 'bokeh' ? p.size * 1.8 : p.size * 0.35;
+          const a = type === 'bokeh' ? p.alpha * 0.25 : p.alpha * (0.5 + 0.5 * Math.sin(t * 3 + p.phase));
+          fxCtx.fillStyle = rgba(state.accent, a);
+          fxCtx.beginPath();
+          fxCtx.arc(p.x, p.y, r, 0, Math.PI * 2);
+          fxCtx.fill();
+        } else if (type === 'leaves') {
+          p.y += p.vy * 45 * dt * sp;
+          p.x += Math.sin(t * 1.5 + p.phase) * 1.2 * sp;
+          if (p.y > h + 30) { p.y = -30; p.x = Math.random() * w; }
+
+          fxCtx.save();
+          fxCtx.translate(p.x, p.y);
+          fxCtx.rotate(t + p.phase);
+          fxCtx.fillStyle = rgba(state.accent, p.alpha * 0.75);
+          fxCtx.beginPath();
+          fxCtx.ellipse(0, 0, p.size * 0.6, p.size * 0.3, 0, 0, Math.PI * 2);
+          fxCtx.fill();
+          fxCtx.restore();
+        } else if (type === 'bass') {
+          p.y -= p.vy * 35 * dt * sp;
+          if (p.y < -30) { p.y = h + 30; p.x = Math.random() * w; }
+          const pulse = 1 + Math.abs(Math.sin(t * 6 + p.phase)) * 0.6;
+          fxCtx.strokeStyle = rgba(state.accent, p.alpha * 0.4);
+          fxCtx.lineWidth = 2;
+          fxCtx.beginPath();
+          fxCtx.arc(p.x, p.y, p.size * pulse, 0, Math.PI * 2);
+          fxCtx.stroke();
+        } else if (type === 'laser') {
+          p.y += p.vy * 70 * dt * sp;
+          if (p.y > h + 60) { p.y = -60; p.x = Math.random() * w; }
+          fxCtx.strokeStyle = rgba(state.accent, p.alpha * 0.5);
+          fxCtx.lineWidth = 3;
+          fxCtx.beginPath();
+          fxCtx.moveTo(p.x, p.y);
+          fxCtx.lineTo(p.x + p.vx * 30, p.y + p.size * 3);
+          fxCtx.stroke();
+        }
+      }
+    }
+
+    function loop(now) {
+      const dt = Math.min(0.05, (now - lastTs) / 1000);
+      lastTs = now;
+      animTime += dt * state.speed;
+
+      if (state.sourceMode === 'procedural') {
+        drawBackgroundScene(animTime);
+      }
+      drawParticles(animTime, dt);
+      requestAnimationFrame(loop);
+    }
+
+    // ==================== SAVED PRESETS (LOCALSTORAGE) ====================
+    const STORAGE_KEY = 'tiktok_bg_studio_presets_v1';
+
+    function loadSavedPresets() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function renderSavedPresets() {
+      const list = loadSavedPresets();
+      const box = document.getElementById('saved-presets-list');
+      if (!list.length) {
+        box.innerHTML = '<div style="font-size:11.5px; color:var(--text-muted);">ยังไม่มีพรีเซ็ตที่บันทึกไว้</div>';
+        return;
+      }
+      box.innerHTML = list.map((item, idx) => `
+        <div class="saved-item">
+          <div class="saved-item-info">
+            <div class="saved-item-name">${item.presetName}</div>
+            <div class="saved-item-meta">${item.data.width}×${item.data.height}</div>
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button class="btn btn-sm btn-cyan" onclick="applySavedPreset(${idx})">ใช้</button>
+            <button class="btn btn-sm" onclick="deleteSavedPreset(${idx})">ลบ</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.applySavedPreset = function(idx) {
+      const list = loadSavedPresets();
+      if (!list[idx]) return;
+      Object.assign(state, list[idx].data);
+      syncInputsFromState();
+      renderCategories();
+      renderScenes();
+      applyVisualSettings();
+      initParticles();
+      showToast(`โหลดพรีเซ็ต "${list[idx].presetName}" แล้ว`);
+    };
+
+    window.deleteSavedPreset = function(idx) {
+      const list = loadSavedPresets();
+      list.splice(idx, 1);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      renderSavedPresets();
+      showToast('ลบพรีเซ็ตแล้ว');
+    };
+
+    // ==================== EVENT WIRING ====================
+    function wireEvents() {
+      // Tabs
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+
+      // Random scene
+      document.getElementById('btn-random-scene').addEventListener('click', () => {
+        const pool = state.activeCat === 'all' ? SCENES : SCENES.filter(s => s.cat === state.activeCat);
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        if (pick) selectScene(pick.id);
+      });
+
+      // Live mode
+      const enterLive = () => {
+        el.appShell.classList.add('live-mode');
+        document.getElementById('btn-exit-live').style.display = 'inline-flex';
+        fitStageToScreen();
+      };
+      const exitLive = () => {
+        el.appShell.classList.remove('live-mode');
+        document.getElementById('btn-exit-live').style.display = 'none';
+        fitStageToScreen();
+      };
+      document.getElementById('btn-live-mode').addEventListener('click', enterLive);
+      document.getElementById('btn-exit-live').addEventListener('click', exitLive);
+      window.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && el.appShell.classList.contains('live-mode')) exitLive();
+      });
+
+      // Source Mode
+      document.getElementById('btn-mode-procedural').addEventListener('click', () => {
+        state.sourceMode = 'procedural';
+        applyVisualSettings();
+        renderScenes();
+      });
+
+      document.getElementById('file-bg-upload').addEventListener('change', e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          state.customImageUrl = ev.target.result;
+          state.sourceMode = 'image';
+          applyVisualSettings();
+          showToast('อัปโหลดภาพพื้นหลังเรียบร้อย');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById('btn-apply-url').addEventListener('click', () => {
+        const url = document.getElementById('input-bg-url').value.trim();
+        if (!url) return;
+        state.customImageUrl = url;
+        state.sourceMode = 'image';
+        applyVisualSettings();
+        showToast('นำเข้ารูปภาพจากลิงก์แล้ว');
+      });
+
+      // Colors
+      ['primary', 'secondary', 'accent'].forEach(key => {
+        document.getElementById('col-' + key).addEventListener('input', e => {
+          state[key] = e.target.value;
+          document.getElementById('hex-' + key).textContent = e.target.value.toUpperCase();
+        });
+      });
+
+      document.getElementById('btn-reset-colors').addEventListener('click', () => {
+        const scene = SCENES.find(s => s.id === state.sceneId) || SCENES[0];
+        state.primary = scene.primary;
+        state.secondary = scene.secondary;
+        state.accent = scene.accent;
+        syncInputsFromState();
+      });
+
+      // Sliders
+      const bindRange = (id, key, suffix, scale = 1, onChange) => {
+        document.getElementById('rng-' + id).addEventListener('input', e => {
+          const val = Number(e.target.value) / scale;
+          state[key] = val;
+          document.getElementById('val-' + id).textContent = (scale === 10 ? val.toFixed(1) : val) + suffix;
+          if (onChange) onChange();
+          applyVisualSettings();
+        });
+      };
+      bindRange('brightness', 'brightness', '%');
+      bindRange('saturate', 'saturate', '%');
+      bindRange('blur', 'blur', ' px');
+      bindRange('dim', 'dim', '%');
+      bindRange('vignette', 'vignette', '%');
+      bindRange('speed', 'speed', 'x', 10);
+      bindRange('density', 'density', '%', 1, initParticles);
+      bindRange('fontsize', 'fontSize', ' px');
+
+      document.getElementById('sel-particle').addEventListener('change', e => {
+        state.particle = e.target.value;
+        initParticles();
+      });
+      document.getElementById('chk-pulse').addEventListener('change', e => {
+        state.pulse = e.target.checked;
+      });
+
+      // Overlay & Text
+      document.getElementById('chk-show-text').addEventListener('change', e => {
+        state.showText = e.target.checked;
+        applyVisualSettings();
+      });
+      document.getElementById('txt-title').addEventListener('input', e => {
+        state.title = e.target.value;
+        applyVisualSettings();
+      });
+      document.getElementById('txt-sub').addEventListener('input', e => {
+        state.subtitle = e.target.value;
+        applyVisualSettings();
+      });
+      document.getElementById('sel-text-pos').addEventListener('change', e => {
+        state.textPos = e.target.value;
+        applyVisualSettings();
+      });
+
+      // Resolution
+      document.getElementById('sel-resolution').addEventListener('change', e => {
+        const val = e.target.value;
+        const customBox = document.getElementById('custom-res-box');
+        if (val === 'custom') {
+          customBox.style.display = 'grid';
+          return;
+        }
+        customBox.style.display = 'none';
+        const [w, h] = val.split('x').map(Number);
+        state.width = w;
+        state.height = h;
+        document.getElementById('num-width').value = w;
+        document.getElementById('num-height').value = h;
+        applyVisualSettings();
+      });
+
+      ['width', 'height'].forEach(dim => {
+        document.getElementById('num-' + dim).addEventListener('change', e => {
+          state[dim] = Math.max(320, Math.min(3840, Number(e.target.value) || 1080));
+          applyVisualSettings();
+        });
+      });
+
+      document.getElementById('chk-safezone').addEventListener('change', e => {
+        state.safeZone = e.target.checked;
+        applyVisualSettings();
+      });
+
+      // Save preset
+      document.getElementById('btn-save-preset').addEventListener('click', () => {
+        const nameInput = document.getElementById('txt-preset-name');
+        const name = nameInput.value.trim() || `ฉากของฉัน #${loadSavedPresets().length + 1}`;
+        const list = loadSavedPresets();
+        list.unshift({ presetName: name, data: { ...state } });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        nameInput.value = '';
+        renderSavedPresets();
+        showToast(`บันทึกพรีเซ็ต "${name}" แล้ว`);
+      });
+
+      // Export / Import JSON
+      document.getElementById('btn-export-json').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `tiktok-bg-${state.sceneId}.json`;
+        a.click();
+        showToast('ส่งออกไฟล์ตั้งค่า JSON แล้ว');
+      });
+
+      document.getElementById('file-import-json').addEventListener('change', e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            Object.assign(state, parsed);
+            syncInputsFromState();
+            renderCategories();
+            renderScenes();
+            applyVisualSettings();
+            initParticles();
+            showToast('นำเข้าการตั้งค่า JSON เรียบร้อย');
+          } catch {
+            showToast('ไฟล์ JSON ไม่ถูกต้อง');
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      // Download PNG Snapshot
+      document.getElementById('btn-download-png').addEventListener('click', () => {
+        const out = document.createElement('canvas');
+        out.width = state.width;
+        out.height = state.height;
+        const ctx = out.getContext('2d');
+        ctx.filter = `brightness(${state.brightness}%) saturate(${state.saturate}%) blur(${state.blur}px)`;
+
+        if (state.sourceMode === 'image' && el.customBgImg.complete && el.customBgImg.naturalWidth > 0) {
+          ctx.drawImage(el.customBgImg, 0, 0, state.width, state.height);
+        } else {
+          ctx.drawImage(el.bgCanvas, 0, 0);
+        }
+        ctx.filter = 'none';
+        ctx.drawImage(el.fxCanvas, 0, 0);
+
+        // Dim & Vignette
+        const dimA = (state.dim / 100) * 0.88;
+        if (dimA > 0) {
+          ctx.fillStyle = `rgba(0,0,0,${dimA})`;
+          ctx.fillRect(0, 0, state.width, state.height);
+        }
+
+        const link = document.createElement('a');
+        link.download = `tiktok-bg-${state.sceneId}-${state.width}x${state.height}.png`;
+        link.href = out.toDataURL('image/png');
+        link.click();
+        showToast(`ดาวน์โหลดภาพ ${state.width}×${state.height} PNG แล้ว`);
+      });
+    }
+
+    // ==================== BOOT ====================
+    renderCategories();
+    renderScenes();
+    renderKeywords();
+    renderSavedPresets();
+    wireEvents();
+    selectScene('lk-1');
+    fitStageToScreen();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
